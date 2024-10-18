@@ -1,0 +1,16 @@
+.user-name {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.user-status {
+    font-size: 1.2rem;
+    color: var(--neutral-foreground-hint);
+}
+
+.user-menu {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    z-index: 100;
+}

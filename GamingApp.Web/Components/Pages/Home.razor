@@ -1,0 +1,91 @@
+﻿@page "/"
+@using GamingApp.Web.Clients
+@using GamingApp.Web.Models
+@using GamingApp.Web.Components.Blocks
+@inject UserApiClient UserApiClient
+@inject GameApiClient GameApiClient
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+<PageTitle>Dashboard - Game Portal</PageTitle>
+
+<div class="dashboard-wrapper">
+    <h1 class="page-title">Welcome to Your Gaming Dashboard</h1>
+
+    @if (_loading)
+    {
+        <FluentProgressRing />
+    }
+    else
+    {
+        <div class="dashboard-content">
+            <div class="dashboard-section">
+                <h2>Recently Played</h2>
+                @if (RecentGames.Any())
+                {
+                    <FluentDataGrid Items="@RecentGames.AsQueryable()" GridTemplateColumns="1fr 1fr">
+                        <PropertyColumn Property="@(g => g.Name)" Title="Game" />
+                        <PropertyColumn Property="@(g => g.LastPlayedDate)" Title="Last Played" Format="MMM dd, yyyy" />
+                    </FluentDataGrid>
+                }
+                else
+                {
+                    <p>No recent games played.</p>
+                }
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Your Stats</h2>
+                <FluentStack Orientation="Orientation.Vertical">
+                    <span>Total Play Time: @UserProfile?.TotalPlayTime.TotalHours.ToString("F1") hours</span>
+                    <span>Games Played: @UserProfile?.GamesPlayed.Count</span>
+                    <span>Achievements Unlocked: @UserProfile?.AchievementsUnlocked.Count</span>
+                </FluentStack>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Quick Actions</h2>
+                <FluentStack Orientation="Orientation.Vertical">
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@(() => NavigateTo("/games"))">Browse Games</FluentButton>
+                    <FluentButton OnClick="@(() => NavigateTo("/profile"))">View Profile</FluentButton>
+                    <FluentButton OnClick="@(() => NavigateTo("/friends"))">Friends List</FluentButton>
+                </FluentStack>
+            </div>
+        </div>
+
+        <div class="recommendations">
+            <h2>Game Recommendations</h2>
+            <GameCardComponent Games="RecommendedGames" />
+        </div>
+    }
+</div>
+
+
+@code {
+    private IEnumerable<Game> RecentGames { get; set; } = [];
+    private IEnumerable<Game> RecommendedGames { get; set; } = [];
+    private UserProfile? UserProfile { get; set; }
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            RecentGames = await GameApiClient.GetRecentGamesAsync(5);
+            RecommendedGames = await GameApiClient.GetRecommendedGamesAsync(4);
+            UserProfile = await UserApiClient.GetUserProfileAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading dashboard: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void NavigateTo(string url)
+    {
+        NavigationManager.NavigateTo(url);
+    }
+}

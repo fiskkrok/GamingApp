@@ -1,0 +1,8 @@
+.page-title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+h1, h2, h3, h4 { color: var(--primary-color) }
+
+.mt-4 { margin-top: 2rem; }

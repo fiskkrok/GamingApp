@@ -1,0 +1,36 @@
+﻿@implements IDialogContentComponent<CreateUserProfileModel>
+
+<FluentDialogBody>
+    <FluentTextField @bind-Value="@Content.InGameUserName" Label="In-Game Username:">
+        <FluentValidationMessage For="@(() => Content.InGameUserName)"/>
+    </FluentTextField>
+</FluentDialogBody>
+
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent" OnClick="@SaveAsync" Disabled="@(!IsValid())">Create</FluentButton>
+    <FluentButton Appearance="Appearance.Neutral" OnClick="@CancelAsync">Cancel</FluentButton>
+</FluentDialogFooter>
+
+@code {
+    [Parameter] public CreateUserProfileModel Content { get; set; } = default!;
+    [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
+
+    private async Task SaveAsync()
+    {
+        if (IsValid())
+        {
+            await Dialog.CloseAsync(Content);
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        await Dialog.CancelAsync();
+    }
+
+    private bool IsValid()
+    {
+        return !string.IsNullOrWhiteSpace(Content.InGameUserName);
+    }
+
+}

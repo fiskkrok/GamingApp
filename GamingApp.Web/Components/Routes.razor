@@ -1,0 +1,12 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using GamingApp.Web.Components.Pages.Account
+<StatefulReconnection/>
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                <AccessDenied/>
+            </NotAuthorized>
+        </AuthorizeRouteView>
+    </Found>
+</Router>

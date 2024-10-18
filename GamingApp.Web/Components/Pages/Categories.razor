@@ -1,0 +1,74 @@
+﻿@page "/categories"
+@using GamingApp.Web.Clients
+@using GamingApp.Web.Models
+@inject CategoryApiClient CategoryApiClient
+@inject NavigationManager NavigationManager
+
+<FluentCard>
+    <h1 class="page-title">Game Categories</h1>
+
+    @if (_loading)
+    {
+        <FluentProgressRing/>
+    }
+    else if (_error)
+    {
+        <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
+            @_errorMessage
+        </FluentMessageBar>
+    }
+    else if (!_categories.Any())
+    {
+        <FluentMessageBar Title="No categories found" Intent="MessageIntent.Warning">
+            Check back later for new categories!
+        </FluentMessageBar>
+    }
+    else
+    {
+        <FluentGrid Columns="4" ColumnSpan="1">
+            @foreach (var category in _categories)
+            {
+                <FluentGridItem>
+                    <FluentCard class="category-card" @onclick="() => NavigateToCategory(category.Id)">
+                        <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center">
+                            <FluentIcon Value="@(new Icons.Regular.Size48.Options())"/>
+                            <h3>@category.Name</h3>
+                            <span>@category.GameCount games</span>
+                        </FluentStack>
+                    </FluentCard>
+                </FluentGridItem>
+            }
+        </FluentGrid>
+    }
+</FluentCard>
+
+@code {
+    private IEnumerable<Category> _categories = Enumerable.Empty<Category>();
+    private bool _loading = true;
+    private bool _error = false;
+    private string _errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _categories = await CategoryApiClient.GetCategoriesAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = true;
+            _errorMessage = $"Error fetching categories: {ex.Message}";
+            Console.Error.WriteLine(_errorMessage);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void NavigateToCategory(int categoryId)
+    {
+        NavigationManager.NavigateTo($"/games?category={categoryId}");
+    }
+
+}

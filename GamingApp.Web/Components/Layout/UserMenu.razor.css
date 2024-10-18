@@ -1,0 +1,50 @@
+/*.user-menu-container {
+    position: relative;*/ /* Ensure the dropdown stays with the button */
+/*}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #333;*/ /* Dark background for the dropdown */
+    /*border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: none;
+    padding: 10px 0;
+    width: 200px;
+}
+
+.user-menu-container:hover .dropdown-menu {
+    display: block;*/ /* Show menu on hover */
+/*}
+
+.dropdown-item {
+    display: block;
+    padding: 10px 20px;
+    color: white;
+    text-align: left;
+    text-decoration: none;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+.dropdown-item:hover {
+    background-color: #444;*/ /* Highlight on hover */
+/*}
+
+.dropdown-button {
+    color: white;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    padding: 10px 20px;
+}
+
+.dropdown-button:hover {
+    background-color: #444;
+}*/

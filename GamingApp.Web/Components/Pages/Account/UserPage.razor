@@ -1,0 +1,133 @@
+﻿@page "/profile"
+@using GamingApp.Web.Clients
+@using GamingApp.Web.Components.Dialogs
+@using GamingApp.Web.Models
+@inject UserApiClient UserApi
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@attribute [Authorize]
+
+<PageTitle>User Profile - Game Portal</PageTitle>
+
+@if (_loading)
+{
+    <FluentProgressRing/>
+}
+else if (_error)
+{
+    <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
+        @_errorMessage
+    </FluentMessageBar>
+}
+else if (_userProfile == null)
+{
+    <FluentCard>
+        <h2>Welcome to Gaming Portal!</h2>
+        <p>You don't seem to have a Game Account yet.</p>
+        <FluentButton Appearance="Appearance.Accent" OnClick="PromptCreateAccount">Create Game Account</FluentButton>
+    </FluentCard>
+}
+else
+{
+    <FluentCard>
+
+        <FluentCard class="mt-4">
+            <h2>About Me</h2>
+            <p>@_userProfile.Bio</p>
+        </FluentCard>
+
+
+        <FluentCard class="mt-4">
+            <h2>Gaming Stats</h2>
+            <FluentGrid Columns="3" ColumnSpan="1">
+                <FluentGridItem>
+                    <h3>Total Play Time</h3>
+                    <span>@_userProfile.TotalPlayTime.TotalHours.ToString("F1") hours</span>
+                </FluentGridItem>
+                <FluentGridItem>
+                    <h3>Games Played</h3>
+                    <span>@_userProfile.GamesPlayed.Count</span>
+                </FluentGridItem>
+                <FluentGridItem>
+                    <h3>Achievements Unlocked</h3>
+                    <span>@_userProfile.AchievementsUnlocked.Count</span>
+                </FluentGridItem>
+            </FluentGrid>
+        </FluentCard>
+
+        <FluentCard class="mt-4">
+            <h2>Recent Achievements</h2>
+            <FluentDataGrid Items="_userProfile.RecentAchievements().AsQueryable()" GridTemplateColumns="auto 1fr auto">
+                <PropertyColumn Property="@(a => a.Name)" Title="Achievement"/>
+                <PropertyColumn Property="@(a => a.UnlockedDate)" Title="Unlocked" Format="MMM dd, yyyy"/>
+            </FluentDataGrid>
+        </FluentCard>
+    </FluentCard>
+}
+
+@code {
+    private UserProfile? _userProfile;
+    private bool _loading = true;
+    private bool _error = false;
+    private string _errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _userProfile = await UserApi.GetUserProfileAsync();
+            _loading = false;
+        }
+        catch (Exception ex)
+        {
+            if (ex is HttpRequestException httpEx && httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                // User doesn't exist in the backend
+                _userProfile = null;
+            }
+            else
+            {
+                _error = true;
+                _errorMessage = $"Error loading user profile: {ex.Message}";
+            }
+
+            _loading = false;
+        }
+    }
+
+    private async Task PromptCreateAccount()
+    {
+        var dialogParameters = new DialogParameters()
+        {
+            Title = "Create Game Account",
+            PrimaryAction = "Create",
+            SecondaryAction = "Cancel",
+            Width = "400px",
+            Height = "300px",
+            PreventDismissOnOverlayClick = true,
+            PreventScroll = true
+        };
+
+        var dialog = await DialogService.ShowDialogAsync<CreateUserProfileDialog>(new CreateUserProfileModel(), dialogParameters);
+        var result = await dialog.Result;
+
+        if (result is { Cancelled: false, Data: CreateUserProfileModel model })
+        {
+            await CreateGameAccount(model.InGameUserName);
+        }
+    }
+
+    private async Task CreateGameAccount(string inGameUserName)
+    {
+        try
+        {
+            _userProfile = await UserApi.CreateUserProfileAsync(inGameUserName);
+            ToastService.ShowSuccess("Game Account created successfully!");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error creating Game Account: {ex.Message}");
+        }
+    }
+
+}

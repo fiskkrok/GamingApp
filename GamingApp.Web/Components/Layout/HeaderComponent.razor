@@ -1,0 +1,35 @@
+﻿@using GamingApp.Web.Components.Blocks
+@inject NavigationManager NavManager
+<header class="header">
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+        <div class="logo">Pixel Quest</div>
+        <button  OnClick="@(() => NavManager.NavigateTo("/"))" class="menu-button">
+            <FluentIcon Value="@(new Icons.Regular.Size24.Home())" Color="Color.Accent" />
+        </button>
+        <button OnClick="@(() => NavManager.NavigateTo("/games"))" class="menu-button">
+            <FluentIcon Value="@(new Icons.Regular.Size24.Games())" Color="Color.Accent" />
+        </button>
+        <button OnClick="@(() => NavManager.NavigateTo("/categories"))" class="menu-button">
+            <FluentIcon Value="@(new Icons.Filled.Size24.Options())" Color="Color.Accent" />
+        </button>
+        <FluentSpacer />
+        <UserMenu />
+    </FluentStack>
+</header>
+
+<style>
+    .header {
+        background-color: var(--primary-color);
+        color: var(--background-color);
+        padding: 10px 20px;
+        box-shadow: 0 2px 4px #000000;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 24px;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px var(--accent-color);
+    }
+</style>

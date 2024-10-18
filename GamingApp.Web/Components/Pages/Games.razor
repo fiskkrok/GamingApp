@@ -1,0 +1,87 @@
+﻿@page "/games"
+@page "/games/{CurrentPage:int}"
+@using GamingApp.Web.Clients
+@using GamingApp.Web.Models
+@using GamingApp.Web.Components.Blocks
+@inject GameApiClient GameApi
+@attribute [StreamRendering(true)]
+
+<PageTitle>Games Library</PageTitle>
+
+<FluentCard class="games-library-container">
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="20" class="games-header">
+        <h1 class="page-title">Games Library</h1>
+        <p class="page-description">Explore our collection of exciting games!</p>
+
+        <FluentSearch Placeholder="Search games..." @bind-Value="@_searchTerm" @oninput="FilterGames"/>
+    </FluentStack>
+
+    @if (_loading)
+    {
+        <FluentProgressRing/>
+    }
+    else if (_error)
+    {
+        <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
+            @_errorMessage
+        </FluentMessageBar>
+    }
+    else if (!_filteredGames.Any())
+    {
+        <FluentMessageBar Title="No games found" Intent="MessageIntent.Warning">
+            Try adjusting your search or check back later for new additions!
+        </FluentMessageBar>
+    }
+    else
+    {
+        <GameCardComponent Games="_filteredGames.Skip((CurrentPage - 1) * PageSize).Take(PageSize)"/>
+        <FluentPaginator State="@State"/>
+    }
+</FluentCard>
+
+
+@code {
+    [Parameter] public int CurrentPage { get; set; } = 1;
+    [Parameter] [EditorRequired] public PaginationState State { get; set; } = new();
+    private IEnumerable<Game> _games = Array.Empty<Game>();
+    private IEnumerable<Game> _filteredGames = Array.Empty<Game>();
+    private bool _loading = true;
+    private bool _error = false;
+    private string _errorMessage = string.Empty;
+    private string _searchTerm = string.Empty;
+    private const int PageSize = 12;
+
+    private int TotalPages => (int)Math.Ceiling(_filteredGames.Count() / (double)PageSize);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _games = await GameApi.GetGamesAsync();
+            _filteredGames = _games;
+        }
+        catch (Exception ex)
+        {
+            _error = true;
+            _errorMessage = $"Error fetching games: {ex.Message}";
+            Console.Error.WriteLine(_errorMessage);
+        }
+        finally
+        {
+            _loading = false;
+        }
+
+        State.ItemsPerPage = PageSize;
+        await State.SetCurrentPageIndexAsync(CurrentPage);
+    }
+
+    private void FilterGames()
+    {
+        _filteredGames = string.IsNullOrWhiteSpace(_searchTerm)
+            ? _games
+            : _games.Where(g => g.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                                (g.Description?.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ?? false));
+        CurrentPage = 1;
+    }
+
+}
