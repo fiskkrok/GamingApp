@@ -12,7 +12,7 @@
                     <FluentBadge Appearance="Appearance.Accent" Color="Color.Accent" Data="@_notificationCount.ToString()" />
                 }
             </button>
-            <button  OnClick="@(() => NavManager.NavigateTo("/messages"))" class="menu-button">
+            <button OnClick="@(() => NavManager.NavigateTo("/messages"))" class="menu-button">
                 <FluentIcon Value="@(new Icons.Regular.Size24.ChatBubblesQuestion())" Color="Color.Accent" />
                 @if (_unreadMessageCount > 0)
                 {

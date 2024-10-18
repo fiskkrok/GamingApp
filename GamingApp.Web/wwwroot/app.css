@@ -17,7 +17,20 @@
 /* Header & Footer */
 .menu-button {
     align-content: center;
+    color: var(--accent-color);
+    background-color: transparent;
+    border: none;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+.menu-button:hover {
+    background-color: var(--background-color);
+    color: var(--primary-color);
+}
+
 .header {
     background-color: var(--header-footer-bg);
     color: white;
@@ -119,9 +132,7 @@
 
 /* Buttons, Links */
 
-/* Buttons, Links */
-
-button, a, .menu-button {
+button, a {
     color: var(--accent-color);
     background-color: transparent;
     border: none;
@@ -131,15 +142,6 @@ button, a, .menu-button {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.menu-button:hover {
-    background-color: var(--background-color);
-    color: var(--primary-color);
-}
-
-
-
 .userName {
     color: white;
 }
-
-
