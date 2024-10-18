@@ -19,6 +19,8 @@
     transform: scale(1.05); /* Smooth scaling */
     box-shadow: 0 8px 20px #000000;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
+    border: 2px solid var(--accent-color); /* Pe165 */
+    outline: 2px solid var(--primary-color); /* Pe165 */
 }
 
 .card-image {
