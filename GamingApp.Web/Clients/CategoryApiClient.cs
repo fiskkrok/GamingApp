@@ -1,4 +1,4 @@
-﻿using GamingApp.Web.Models;
+using GamingApp.Web.Models;
 
 namespace GamingApp.Web.Clients;
 
@@ -6,7 +6,12 @@ public class CategoryApiClient(HttpClient httpClient)
 {
     public async Task<IEnumerable<Category>> GetCategoriesAsync()
     {
-        var response = await httpClient.GetFromJsonAsync<List<Category>>("/categories");
-        return response ?? Enumerable.Empty<Category>();
+        return await GetFromApiAsync<List<Category>>("/categories") ?? Enumerable.Empty<Category>();
+    }
+
+    private async Task<T?> GetFromApiAsync<T>(string endpoint)
+    {
+        var response = await httpClient.GetFromJsonAsync<T>(endpoint);
+        return response;
     }
 }
