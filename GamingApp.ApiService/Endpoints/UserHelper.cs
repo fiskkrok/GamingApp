@@ -24,10 +24,7 @@ public static class UserHelper
                 context.User.Identity?.Name ?? "Unknown",
                 context.User.FindFirst("email")?.Value ?? "Unknown",
                 DateTime.UtcNow,
-                "Unknown",
-                null,
-                null,
-                null
+                "Unknown"
             );
             dbContext.Users.Add(user);
             try

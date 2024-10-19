@@ -1,0 +1,21 @@
+.friend-list-button:hover {
+    box-shadow: 1px 1px 7px 1px var(--text-color-secondary);
+}
+.friend-list-button {
+    color: var(--text-color-secondary);
+    width: 140px;
+    height: 30px;
+    padding: 0px;
+    background: var(--bs-focus-ring-color);
+    text-align: center;
+    border: none;
+    border-radius: 4px;
+}
+.glow {
+    font-weight: bold;
+    font-size: 15px;
+    box-shadow: 1px 1px 7px 1px var(--text-color-secondary);
+    text-shadow: 1px 1px #001527;
+}
+
+

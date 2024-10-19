@@ -1,0 +1,42 @@
+﻿
+
+<div class="dropdown" style="transition: ease-in-out; transform-style: preserve-3d;z-index: 2;" >
+
+    <button class="friend-list-button" @onclick="@(() => open = !open)" Id="friendsList" > <div class="glow"> Friends Online: @friendList.Count </div> </button>
+
+    <FluentMenu Anchor="friendsList" @bind-Open="open" HorizontalPosition="HorizontalPosition.Center">
+        @foreach(var friend in friendList)
+        {
+            <a class="dropdown-item" href="#">@friend.Username - @friend.Status</a>
+        }
+    </FluentMenu>
+</div>
+@code {
+        private bool open = false;
+    private class ShallowFriendDto
+    {
+        public string Id { get; set; }
+        public string Username { get; set; }
+        public string Status { get; set; }
+
+    }
+
+    List<ShallowFriendDto> friendList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        friendList = new List<ShallowFriendDto>
+        {
+            new ShallowFriendDto { Id = "1", Username = "John Doe", Status = "Online" },
+            new ShallowFriendDto { Id = "2", Username = "Jane Doe", Status = "Offline" },
+            new ShallowFriendDto { Id = "3", Username = "John Smith", Status = "Online" },
+            new ShallowFriendDto { Id = "4", Username = "Jane Smith", Status = "Offline" },
+            new ShallowFriendDto { Id = "5", Username = "John Johnson", Status = "Online" },
+            new ShallowFriendDto { Id = "6", Username = "Jane Johnson", Status = "Offline" },
+            new ShallowFriendDto { Id = "7", Username = "John Brown", Status = "Online" },
+            new ShallowFriendDto { Id = "8", Username = "Jane Brown", Status = "Offline" },
+            new ShallowFriendDto { Id = "9", Username = "John White", Status = "Online" },
+            new ShallowFriendDto { Id = "10", Username = "Jane White", Status = "Offline" },
+        };
+    }
+}

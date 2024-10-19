@@ -145,10 +145,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             "MockUser",
             "mockuser@example.com",
             DateTime.UtcNow,
-            "MockGamer",
-            "Some Cool Game",
-            "I'm a mock user for testing purposes.",
-            "Online"
+            "MockGamer"
         );
 
         var games = await dbContext.Games.Take(3).ToListAsync();

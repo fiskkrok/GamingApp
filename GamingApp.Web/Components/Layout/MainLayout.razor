@@ -1,10 +1,12 @@
-﻿@inherits LayoutComponentBase
+﻿@using GamingApp.Web.Components.Blocks
+@inherits LayoutComponentBase
 
 <LayoutView>
     <HeaderComponent />
-    <FluentStack Orientation="Orientation.Horizontal" Width="100%" Height="calc(100vh - 60px - 50px)">
+    <FluentStack Orientation="Orientation.Horizontal" Width="100%"  Style="height: 100%">
         <body class="content-wrapper">
-            @Body
+    <FriendList />
+        @Body
         </body>
     </FluentStack>
     <FooterComponent />
