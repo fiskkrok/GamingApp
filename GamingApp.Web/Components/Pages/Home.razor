@@ -45,9 +45,9 @@
             <div class="dashboard-section">
                 <h2>Quick Actions</h2>
                 <FluentStack Orientation="Orientation.Vertical">
-                    <FluentButton Appearance="Appearance.Accent" OnClick="@(() => NavigateTo("/games"))" class="menu-button">Browse Games</FluentButton>
-                    <FluentButton OnClick="@(() => NavigateTo("/profile"))" class="menu-button">View Profile</FluentButton>
-                    <FluentButton OnClick="@(() => NavigateTo("/friends"))" class="menu-button">Friends List</FluentButton>
+                    <button onclick="@(() => NavigateTo("/games"))" class="btn btn-primary">Browse Games</button>
+                    <button onclick="@(() => NavigateTo("/profile"))" class="btn btn-outline-secondary">View Profile</button>
+                    <button onclick="@(() => NavigateTo("/friends"))" class="btn btn-outline-secondary">Friends List</button>
                 </FluentStack>
             </div>
         </div>

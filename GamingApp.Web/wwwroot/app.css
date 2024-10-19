@@ -3,34 +3,32 @@
     --primary-color: #2b2d42; /* Dark indigo */
     --secondary-color: #8d99ae; /* Light grey-blue */
     --accent-color: #ef233c; /* Vibrant red */
-    --background-color: #edf2f4;  /*Soft off-white */
+    --accent-color-darker: #434768; /* Vibrant red */
+    --background-color: #edf2f4; /*Soft off-white */
     --background-color-dark: #1a202c; /* Dark blue-gray */
     --text-color: #2c3e50; /* Dark blue-gray */
     --header-footer-bg: #282c34; /* Deep dark background for header and footer */
 
     --font-family-base: 'Fira Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-.body, .html {
+html, body {
+    margin: 0;
+    height: 100%;
     background-color: var(--background-color-dark);
 }
-/* Header & Footer */
-.menu-button {
-    align-content: center;
-    color: var(--accent-color);
-    background-color: transparent;
+.btn-outline-dark {
+    outline-color: var(--primary-color);
+}
+.btn-primary {
+    background-color: var(--primary-color);
     border: none;
-    outline: none;
-    position: relative;
-    overflow: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    color: var(--accent-color)
+}
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    border: none;
 }
 
-.menu-button:hover {
-    background-color: var(--background-color);
-    color: var(--primary-color);
-    box-shadow: 0 0 10px var(--accent-color); /* P44a4 */
-}
 
 .header {
     background-color: var(--header-footer-bg);
@@ -125,16 +123,33 @@
     width: 100%;
     background-color: #333333;
     padding: 20px;
-    border-radius: 8px;
     border-color: #2b2d42;
     box-shadow: 0 4px 6px #000000;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Buttons, Links */
+/* Header & Footer */
+.menu-button {
+    align-content: center;
+    color: var(--accent-color);
+    background-color: transparent;
+    border: none;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 5px;
+}
+
+    .menu-button:hover {
+        color: var(--primary-color);
+        box-shadow: 0 0 200px var(--accent-color-darker);
+        transform: scale(1.1);
+    }
 
 button, a {
-    color: var(--accent-color);
+    color: var(--accent-color-darker);
     background-color: transparent;
     border: none;
     outline: none;
@@ -145,4 +160,8 @@ button, a {
 
 .userName {
     color: white;
+    font-size: 20px;
+    margin-top: 17px;
+    margin-right: 5px;
+    margin-buttom: -2px;
 }

@@ -3,13 +3,13 @@
 <header class="header">
     <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
         <div class="logo">Pixel Quest</div>
-        <button  OnClick="@(() => NavManager.NavigateTo("/"))" class="menu-button">
+        <button @onclick="@(() => NavManager.NavigateTo("/"))" class="menu-button">
             <FluentIcon Value="@(new Icons.Regular.Size24.Home())" Color="Color.Accent" />
         </button>
-        <button OnClick="@(() => NavManager.NavigateTo("/games"))" class="menu-button">
+        <button @onclick="@(() => NavManager.NavigateTo("/games"))" class="menu-button">
             <FluentIcon Value="@(new Icons.Regular.Size24.Games())" Color="Color.Accent" />
         </button>
-        <button OnClick="@(() => NavManager.NavigateTo("/categories"))" class="menu-button">
+        <button @onclick="@(() => NavManager.NavigateTo("/categories"))" class="menu-button">
             <FluentIcon Value="@(new Icons.Filled.Size24.Options())" Color="Color.Accent" />
         </button>
         <FluentSpacer />
@@ -34,6 +34,6 @@
     }
 
     .menu-button:hover {
-        box-shadow: 0 0 10px var(--accent-color);
+        box-shadow: 0 0 10px #6e0f1b;
     }
 </style>
