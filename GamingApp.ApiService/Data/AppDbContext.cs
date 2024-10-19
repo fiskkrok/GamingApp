@@ -33,8 +33,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         await retryPolicy.ExecuteAsync(async () =>
         {
-            await dbContext.Database.MigrateAsync();
-            await InitializeDataAsync(dbContext);
+            try
+            {
+                await dbContext.Database.MigrateAsync();
+                await InitializeDataAsync(dbContext);
+            }
+            catch (Exception ex)
+            {
+                // Log the error (you can replace this with your logging mechanism)
+                Console.Error.WriteLine($"An error occurred while ensuring the database is created: {ex.Message}");
+                throw;
+            }
         });
     }
 
@@ -46,7 +55,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             await using var transaction = await dbContext.Database.BeginTransactionAsync();
             try
             {
-                // Add categories
                 var newCategories = new[]
                 {
                     new Category { Name = "Action", GameCount = 0, Icon = "TempString" },
@@ -56,17 +64,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 await dbContext.Categories.AddRangeAsync(newCategories);
                 await dbContext.SaveChangesAsync();
 
-                // Retrieve categories with IDs assigned
-                
-
-                // Generate and add mock games with valid GenreIds
                 await dbContext.Games.AddRangeAsync((await GenerateMockGames(dbContext)));
                 await dbContext.SaveChangesAsync();
 
-                // Generate mock user
                 var user = await GenerateMockUser(dbContext);
 
-                // Generate mock game sessions
                 await GenerateMockGameSessions(dbContext, user);
                 await transaction.CommitAsync();
             }
@@ -149,7 +151,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             "Online"
         );
 
-        // Add some played games to the user
         var games = await dbContext.Games.Take(3).ToListAsync();
         foreach (var game in games)
         {

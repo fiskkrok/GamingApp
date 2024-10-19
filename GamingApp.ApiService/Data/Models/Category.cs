@@ -13,6 +13,4 @@ public class Category
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     [JsonIgnore] // Add this attribute to ignore during serialization
     public ICollection<Game> Games { get; init; } = [];
-
-    public ICollection<Category> Categories { get; init; } = [];
 }
