@@ -1,40 +1,32 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GamingApp.ApiService.Data.Models;
 
-public class User(
-    string identityServerSid,
-    string username,
-    string email,
-    DateTime createdAt,
-    string inGameUserName,
-    string? favoriteGame,
-    string? bio,
-    string? status)
+public class User
 {
     public int Id { get; init; }
 
-    [Required] public string IdentityServerSid { get; init; } = identityServerSid;
+    [Required] public string IdentityServerSid { get; init; }
 
-    [Required] public string Username { get; init; } = username;
+    [Required] public string Username { get; init; }
 
-    [Required] public string Email { get; init; } = email;
+    [Required] public string Email { get; init; }
 
-    public DateTime CreatedAt { get; init; } = createdAt;
+    public DateTime CreatedAt { get; init; }
 
-    [Required] public string InGameUserName { get; init; } = inGameUserName;
+    [Required] public string InGameUserName { get; init; }
 
-    public string? FavoriteGame { get; init; } = favoriteGame;
+    public string? FavoriteGame { get; init; }
 
-    public string? Bio { get; init; } = bio;
+    public string? Bio { get; init; }
 
-    public string? Status { get; init; } = status;
+    public string? Status { get; init; }
 
     // Navigation properties
-    public ICollection<GameSession> GameSessions { get; init; } = (List<GameSession>) [];
-    public ICollection<Achievement> AchievementsUnlocked { get; init; } = (List<Achievement>) [];
-    public ICollection<Game> PlayedGames { get; init; } = (List<Game>) [];
+    public ICollection<GameSession> GameSessions { get; init; } = new List<GameSession>();
+    public ICollection<Achievement> AchievementsUnlocked { get; init; } = new List<Achievement>();
+    public ICollection<Game> PlayedGames { get; init; } = new List<Game>();
 
     [NotMapped]
     public TimeSpan TotalPlayTime => TimeSpan.FromTicks(GameSessions.Sum(gs => (gs.EndTime - gs.StartTime).Ticks));
@@ -47,5 +39,14 @@ public class User(
             .OrderByDescending(a => a.Score)
             .Take(count)
             .ToList();
+    }
+
+    public User(string identityServerSid, string username, string email, DateTime createdAt, string inGameUserName)
+    {
+        IdentityServerSid = identityServerSid;
+        Username = username;
+        Email = email;
+        CreatedAt = createdAt;
+        InGameUserName = inGameUserName;
     }
 }

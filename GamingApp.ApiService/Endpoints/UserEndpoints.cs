@@ -59,25 +59,22 @@ public static class UserEndpoints
         AppDbContext context,
         HttpContext httpContext,
         [FromBody] CreateUserProfileRequest? request,
-        ILogger<Program> logger) // Add ILogger parameter
+        ILogger<Program> logger)
     {
         var identityServerSid = httpContext.User.FindFirst("sid")?.Value;
         if (string.IsNullOrEmpty(identityServerSid)) return Results.Unauthorized();
 
         try
         {
-            var (name, email) = httpContext.GetNameAndEmail(logger); // Pass logger to GetNameAndEmail
+            var (name, email) = httpContext.GetNameAndEmail(logger);
 
             var user = new User
             (
-       identityServerSid,
-      name,
+                identityServerSid,
+                name,
                 email,
-             DateTime.UtcNow,
-               request?.InGameUserName ?? "Unknown",
-       favoriteGame: "Cool Game",
-         bio: "I'm a new user",
-          status: "Online"
+                DateTime.UtcNow,
+                request?.InGameUserName ?? "Unknown"
             );
 
             context.Users.Add(user);
