@@ -9,26 +9,22 @@ public class GameApiClient(HttpClient httpClient)
 {
     public async Task<IEnumerable<Game>> GetGamesAsync(int maxItems = 10)
     {
-        var response = await httpClient.GetFromJsonAsync<List<Game>>($"/games/{maxItems}");
-        return response ?? Enumerable.Empty<Game>();
+        return await GetFromApiAsync<List<Game>>($"/games/{maxItems}") ?? Enumerable.Empty<Game>();
     }
 
     public async Task<IEnumerable<Game>> GetRecentGamesAsync(int count)
     {
-        var response = await httpClient.GetFromJsonAsync<List<Game>>($"/recentGames/{count}");
-        return response ?? Enumerable.Empty<Game>();
+        return await GetFromApiAsync<List<Game>>($"/recentGames/{count}") ?? Enumerable.Empty<Game>();
     }
 
     public async Task<IEnumerable<Game>> GetRecommendedGamesAsync(int count)
     {
-        var response = await httpClient.GetFromJsonAsync<List<Game>>($"/recommendedGames/{count}");
-        return response ?? Enumerable.Empty<Game>();
+        return await GetFromApiAsync<List<Game>>($"/recommendedGames/{count}") ?? Enumerable.Empty<Game>();
     }
-}
 
-public class UserStats
-{
-    public TimeSpan TotalPlayTime { get; set; }
-    public int GamesPlayed { get; set; }
-    public int AchievementsUnlocked { get; set; }
+    private async Task<T?> GetFromApiAsync<T>(string endpoint)
+    {
+        var response = await httpClient.GetFromJsonAsync<T>(endpoint);
+        return response;
+    }
 }

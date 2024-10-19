@@ -30,38 +30,34 @@ else if (_userProfile == null)
 else
 {
     <FluentCard>
+        <h2>About Me</h2>
+        <p>@_userProfile.Bio</p>
+    </FluentCard>
 
-        <FluentCard class="mt-4">
-            <h2>About Me</h2>
-            <p>@_userProfile.Bio</p>
-        </FluentCard>
+    <FluentCard class="mt-4">
+        <h2>Gaming Stats</h2>
+        <FluentGrid Columns="3" ColumnSpan="1">
+            <FluentGridItem>
+                <h3>Total Play Time</h3>
+                <span>@_userProfile.TotalPlayTime.TotalHours.ToString("F1") hours</span>
+            </FluentGridItem>
+            <FluentGridItem>
+                <h3>Games Played</h3>
+                <span>@_userProfile.GamesPlayed.Count</span>
+            </FluentGridItem>
+            <FluentGridItem>
+                <h3>Achievements Unlocked</h3>
+                <span>@_userProfile.AchievementsUnlocked.Count</span>
+            </FluentGridItem>
+        </FluentGrid>
+    </FluentCard>
 
-
-        <FluentCard class="mt-4">
-            <h2>Gaming Stats</h2>
-            <FluentGrid Columns="3" ColumnSpan="1">
-                <FluentGridItem>
-                    <h3>Total Play Time</h3>
-                    <span>@_userProfile.TotalPlayTime.TotalHours.ToString("F1") hours</span>
-                </FluentGridItem>
-                <FluentGridItem>
-                    <h3>Games Played</h3>
-                    <span>@_userProfile.GamesPlayed.Count</span>
-                </FluentGridItem>
-                <FluentGridItem>
-                    <h3>Achievements Unlocked</h3>
-                    <span>@_userProfile.AchievementsUnlocked.Count</span>
-                </FluentGridItem>
-            </FluentGrid>
-        </FluentCard>
-
-        <FluentCard class="mt-4">
-            <h2>Recent Achievements</h2>
-            <FluentDataGrid Items="_userProfile.RecentAchievements().AsQueryable()" GridTemplateColumns="auto 1fr auto">
-                <PropertyColumn Property="@(a => a.Name)" Title="Achievement"/>
-                <PropertyColumn Property="@(a => a.UnlockedDate)" Title="Unlocked" Format="MMM dd, yyyy"/>
-            </FluentDataGrid>
-        </FluentCard>
+    <FluentCard class="mt-4">
+        <h2>Recent Achievements</h2>
+        <FluentDataGrid Items="_userProfile.RecentAchievements().AsQueryable()" GridTemplateColumns="auto 1fr auto">
+            <PropertyColumn Property="@(a => a.Name)" Title="Achievement"/>
+            <PropertyColumn Property="@(a => a.UnlockedDate)" Title="Unlocked" Format="MMM dd, yyyy"/>
+        </FluentDataGrid>
     </FluentCard>
 }
 

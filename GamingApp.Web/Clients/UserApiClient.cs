@@ -1,4 +1,4 @@
-﻿using GamingApp.Web.Models;
+using GamingApp.Web.Models;
 
 namespace GamingApp.Web.Clients;
 
@@ -6,10 +6,7 @@ public class UserApiClient(HttpClient httpClient)
 {
     public async Task<UserProfile?> GetUserProfileAsync()
     {
-        var response = await httpClient.GetAsync("/userProfile");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<UserProfile>();
+        return await GetFromApiAsync<UserProfile>("/userProfile");
     }
 
     public async Task<UserProfile> CreateUserProfileAsync(string inGameUserName)
@@ -22,15 +19,18 @@ public class UserApiClient(HttpClient httpClient)
 
     public async Task<bool> IsInGameUserNameUniqueAsync(string inGameUserName)
     {
-        var response =
-            await httpClient.GetAsync($"/userProfile/checkUsername?username={Uri.EscapeDataString(inGameUserName)}");
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<bool>();
+        return await GetFromApiAsync<bool>($"/userProfile/checkUsername?username={Uri.EscapeDataString(inGameUserName)}");
     }
 
     public async Task UpdateUserProfileAsync(UserProfile userProfile)
     {
         var response = await httpClient.PutAsJsonAsync("/userProfile", userProfile);
         response.EnsureSuccessStatusCode();
+    }
+
+    private async Task<T?> GetFromApiAsync<T>(string endpoint)
+    {
+        var response = await httpClient.GetFromJsonAsync<T>(endpoint);
+        return response;
     }
 }
