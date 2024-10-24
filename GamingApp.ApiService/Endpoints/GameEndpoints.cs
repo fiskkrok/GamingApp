@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using GamingApp.ApiService.Data;
 using GamingApp.ApiService.Data.Models;
+using GamingApp.ApiService.Services;
+using GamingApp.ApiService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GamingApp.ApiService.Endpoints;
@@ -14,16 +16,32 @@ public static class GameEndpoints
         app.MapGet("/recommendedGames/{count:int}", GetRecommendedGamesAsync).RequireAuthorization();
     }
 
-    private static async ValueTask<IResult> GetAllGamesAsync(AppDbContext context, ILogger<Program> logger,[FromRoute]int max)
+    private static async ValueTask<IResult> GetAllGamesAsync(
+        AppDbContext context,
+        ILogger<Program> logger,
+        ICacheService cache,
+        [FromRoute] int max)
     {
         try
         {
-            var games = await context.Games
-                .Include(g => g.Genre).Take(max)
+            var cacheKey = CacheKeys.GetGamesKey(max);
+            var cachedGames = await cache.GetAsync<List<Game>>(cacheKey);
+
+            if (cachedGames != null)
+            {
+                logger.LogInformation("Retrieved {Count} games from cache", cachedGames.Count);
+                return Results.Ok(cachedGames);
+            }
+
+            var gamesFromDb = await context.Games
+                .Include(g => g.Genre)
+                .Take(max)
                 .ToListAsync();
 
-            logger.LogInformation("Retrieved {Count} games", games.Count);
-            return Results.Ok(games);
+            await cache.SetAsync(cacheKey, gamesFromDb);
+
+            logger.LogInformation("Retrieved {Count} games from database", gamesFromDb.Count);
+            return Results.Ok(gamesFromDb);
         }
         catch (Exception e)
         {
@@ -90,3 +108,15 @@ public static class GameEndpoints
         }
     }
 }
+
+//// Example: When a game is updated
+//public static async Task<IResult> UpdateGameAsync(
+//    AppDbContext context,
+//    ICacheService cache,
+//    Game game)
+//{
+//    // Update game logic...
+//    await cache.RemoveByPrefixAsync(CacheKeys.Games);
+//    await cache.RemoveByPrefixAsync(CacheKeys.RecommendedGames);
+//    // ...
+//}
