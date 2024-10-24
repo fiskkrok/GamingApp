@@ -15,7 +15,8 @@ var cache = builder.AddRedis("cache");
 
 var apiService = builder.AddProject<GamingApp_ApiService>("apiservice")
     .WithReference(apiserviceDb)
-    .WithEnvironment("IdentityUrl", identityEndpoint);
+    .WithEnvironment("IdentityUrl", identityEndpoint)
+    .WithReference(cache); // Utilize Redis setup for caching in the API service
 
 var clientweb = builder.AddProject<GamingApp_Web>("clientweb")
     .WithExternalHttpEndpoints()

@@ -4,6 +4,8 @@ using GamingApp.ApiService.Data.Models;
 using GamingApp.ApiService.Services;
 using GamingApp.ApiService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace GamingApp.ApiService.Endpoints;
 
@@ -53,18 +55,35 @@ public static class GameEndpoints
     private static async ValueTask<IResult> GetRecentGamesAsync(
         AppDbContext context,
         ILogger<Program> logger,
+        IDistributedCache cache,
         [FromRoute] int count = 10)
     {
         try
         {
-            var recentGames = await context.Games
+            var cacheKey = $"recentGames_{count}";
+            var cachedRecentGames = await cache.GetStringAsync(cacheKey);
+
+            if (!string.IsNullOrEmpty(cachedRecentGames))
+            {
+                var recentGames = JsonSerializer.Deserialize<List<Game>>(cachedRecentGames);
+                logger.LogInformation("Retrieved {Count} recent games from cache", recentGames.Count);
+                return Results.Ok(recentGames);
+            }
+
+            var recentGamesFromDb = await context.Games
                 .Include(g => g.Genre)
                 .OrderByDescending(g => g.CreatedAt)
                 .Take(count)
                 .ToListAsync();
 
-            logger.LogInformation("Retrieved {Count} recent games", recentGames.Count);
-            return Results.Ok(recentGames);
+            var serializedRecentGames = JsonSerializer.Serialize(recentGamesFromDb);
+            await cache.SetStringAsync(cacheKey, serializedRecentGames, new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+
+            logger.LogInformation("Retrieved {Count} recent games from database", recentGamesFromDb.Count);
+            return Results.Ok(recentGamesFromDb);
         }
         catch (Exception e)
         {
@@ -76,11 +95,22 @@ public static class GameEndpoints
     private static async ValueTask<IResult> GetRecommendedGamesAsync(
         AppDbContext context,
         ILogger<Program> logger,
+        IDistributedCache cache,
         [FromRoute] int count = 10)
     {
         try
         {
-            var recommendedGames = await context.Games
+            var cacheKey = $"recommendedGames_{count}";
+            var cachedRecommendedGames = await cache.GetStringAsync(cacheKey);
+
+            if (!string.IsNullOrEmpty(cachedRecommendedGames))
+            {
+                var recommendedGames = JsonSerializer.Deserialize<List<object>>(cachedRecommendedGames);
+                logger.LogInformation("Retrieved {Count} recommended games from cache", recommendedGames.Count);
+                return Results.Ok(recommendedGames);
+            }
+
+            var recommendedGamesFromDb = await context.Games
                 .Include(g => g.Genre)
                 .Include(g => g.GameSessions)
                 .OrderByDescending(g => g.GameSessions.Count)
@@ -98,8 +128,14 @@ public static class GameEndpoints
                 })
                 .ToListAsync();
 
-            logger.LogInformation("Retrieved {Count} recommended games", recommendedGames.Count);
-            return Results.Ok(recommendedGames);
+            var serializedRecommendedGames = JsonSerializer.Serialize(recommendedGamesFromDb);
+            await cache.SetStringAsync(cacheKey, serializedRecommendedGames, new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+
+            logger.LogInformation("Retrieved {Count} recommended games from database", recommendedGamesFromDb.Count);
+            return Results.Ok(recommendedGamesFromDb);
         }
         catch (Exception e)
         {
