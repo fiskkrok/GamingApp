@@ -51,6 +51,18 @@ builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>()
 
 var app = builder.Build();
 
+// Add global exception handler middleware
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+// Add middleware to log correlation ID for each request
+app.Use(async (context, next) =>
+{
+    var correlationId = Guid.NewGuid().ToString();
+    context.Items["CorrelationId"] = correlationId;
+    context.Response.Headers.Add("X-Correlation-ID", correlationId);
+    await next.Invoke();
+});
+
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
 

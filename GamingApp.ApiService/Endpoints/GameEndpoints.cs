@@ -16,8 +16,9 @@ public static class GameEndpoints
         app.MapGet("/recommendedGames/{count:int}", GetRecommendedGamesAsync).RequireAuthorization();
     }
 
-    private static async ValueTask<IResult> GetAllGamesAsync(AppDbContext context, ILogger<Program> logger, IDistributedCache cache, [FromRoute]int max)
+    private static async ValueTask<IResult> GetAllGamesAsync(AppDbContext context, ILogger<Program> logger, IDistributedCache cache, [FromRoute]int max, HttpContext httpContext)
     {
+        var correlationId = httpContext.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
         try
         {
             var cacheKey = $"games_{max}";
@@ -26,7 +27,7 @@ public static class GameEndpoints
             if (!string.IsNullOrEmpty(cachedGames))
             {
                 var games = JsonSerializer.Deserialize<List<Game>>(cachedGames);
-                logger.LogInformation("Retrieved {Count} games from cache", games.Count);
+                logger.LogInformation("Retrieved {Count} games from cache. Correlation ID: {CorrelationId}", games.Count, correlationId);
                 return Results.Ok(games);
             }
 
@@ -40,12 +41,12 @@ public static class GameEndpoints
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             });
 
-            logger.LogInformation("Retrieved {Count} games from database", gamesFromDb.Count);
+            logger.LogInformation("Retrieved {Count} games from database. Correlation ID: {CorrelationId}", gamesFromDb.Count, correlationId);
             return Results.Ok(gamesFromDb);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error occurred while fetching games");
+            logger.LogError(e, "Error occurred while fetching games. Correlation ID: {CorrelationId}", correlationId);
             return Results.Problem("An error occurred while fetching games");
         }
     }
@@ -54,8 +55,10 @@ public static class GameEndpoints
         AppDbContext context,
         ILogger<Program> logger,
         IDistributedCache cache,
-        [FromRoute] int count = 10)
+        [FromRoute] int count = 10,
+        HttpContext httpContext)
     {
+        var correlationId = httpContext.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
         try
         {
             var cacheKey = $"recentGames_{count}";
@@ -64,7 +67,7 @@ public static class GameEndpoints
             if (!string.IsNullOrEmpty(cachedRecentGames))
             {
                 var recentGames = JsonSerializer.Deserialize<List<Game>>(cachedRecentGames);
-                logger.LogInformation("Retrieved {Count} recent games from cache", recentGames.Count);
+                logger.LogInformation("Retrieved {Count} recent games from cache. Correlation ID: {CorrelationId}", recentGames.Count, correlationId);
                 return Results.Ok(recentGames);
             }
 
@@ -80,12 +83,12 @@ public static class GameEndpoints
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             });
 
-            logger.LogInformation("Retrieved {Count} recent games from database", recentGamesFromDb.Count);
+            logger.LogInformation("Retrieved {Count} recent games from database. Correlation ID: {CorrelationId}", recentGamesFromDb.Count, correlationId);
             return Results.Ok(recentGamesFromDb);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error occurred while fetching recent games");
+            logger.LogError(e, "Error occurred while fetching recent games. Correlation ID: {CorrelationId}", correlationId);
             return Results.Problem("An error occurred while fetching recent games");
         }
     }
@@ -94,8 +97,10 @@ public static class GameEndpoints
         AppDbContext context,
         ILogger<Program> logger,
         IDistributedCache cache,
-        [FromRoute] int count = 10)
+        [FromRoute] int count = 10,
+        HttpContext httpContext)
     {
+        var correlationId = httpContext.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
         try
         {
             var cacheKey = $"recommendedGames_{count}";
@@ -104,7 +109,7 @@ public static class GameEndpoints
             if (!string.IsNullOrEmpty(cachedRecommendedGames))
             {
                 var recommendedGames = JsonSerializer.Deserialize<List<object>>(cachedRecommendedGames);
-                logger.LogInformation("Retrieved {Count} recommended games from cache", recommendedGames.Count);
+                logger.LogInformation("Retrieved {Count} recommended games from cache. Correlation ID: {CorrelationId}", recommendedGames.Count, correlationId);
                 return Results.Ok(recommendedGames);
             }
 
@@ -132,12 +137,12 @@ public static class GameEndpoints
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             });
 
-            logger.LogInformation("Retrieved {Count} recommended games from database", recommendedGamesFromDb.Count);
+            logger.LogInformation("Retrieved {Count} recommended games from database. Correlation ID: {CorrelationId}", recommendedGamesFromDb.Count, correlationId);
             return Results.Ok(recommendedGamesFromDb);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error occurred while fetching recommended games");
+            logger.LogError(e, "Error occurred while fetching recommended games. Correlation ID: {CorrelationId}", correlationId);
             return Results.Problem("An error occurred while fetching recommended games");
         }
     }

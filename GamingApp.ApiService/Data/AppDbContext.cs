@@ -1,8 +1,6 @@
-﻿
 using Polly;
 using Microsoft.EntityFrameworkCore;
 using GamingApp.ApiService.Data.Models;
-
 
 namespace GamingApp.ApiService.Data;
 
@@ -38,8 +36,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             }
             catch (Exception ex)
             {
-                // Log the error (you can replace this with your logging mechanism)
-                await Console.Error.WriteLineAsync($"An error occurred while ensuring the database is created: {ex.Message}");
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<AppDbContext>>();
+                var correlationId = Guid.NewGuid().ToString();
+                logger.LogError(ex, "An error occurred while ensuring the database is created. Correlation ID: {CorrelationId}", correlationId);
                 throw;
             }
         });
@@ -73,8 +72,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 await GenerateMockGameSessions(dbContext, user);
                 await transaction.CommitAsync();
             }
-            catch
+            catch (Exception ex)
             {
+                var logger = dbContext.GetService<ILogger<AppDbContext>>();
+                var correlationId = Guid.NewGuid().ToString();
+                logger.LogError(ex, "An error occurred while initializing data. Correlation ID: {CorrelationId}", correlationId);
                 await transaction.RollbackAsync();
                 throw;
             }
