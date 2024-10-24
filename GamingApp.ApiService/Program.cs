@@ -6,12 +6,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AspNetCoreRateLimit;
+using StackExchange.Redis;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire components.
 builder.AddServiceDefaults();
 builder.AddNpgsqlDbContext<AppDbContext>("apiservicedb");
+
+// Add Redis caching configuration
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "GamingApp_";
+});
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
