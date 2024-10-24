@@ -1,29 +1,26 @@
 ﻿@using GamingApp.Web.Models
 
-<div class="game-card-container">
-    @foreach (var game in Games)
-    {
-        <FluentCard @onclick="() => OpenGameDetails(game)" class="game-card">
-            <div class="card-image">
-                <img src="@game.PictureUrl" alt="@game.Name"/>
-                @if (game.LastPlayedDate.HasValue)
-                {
-                    <div class="progress-bar">
-                        <div class="progress" style="width: @GetProgressWidth(game)%"></div>
-                    </div>
-                }
-            </div>
-            <div class="card-content">
-                <h3 class="text-primary">@game.Name</h3>
-                <p class="game-brief">@(game.Description?.Length > 50 ? game.Description[..50] + "..." : game.Description)</p>
-                <p class="game-genre">@game.Genre.Name</p>
-            </div>
-        </FluentCard>
-    }
-</div>
+@foreach (var game in Games)
+{
+    <FluentCard @onclick="() => OpenGameDetails(game)" class="game-card">
+        <div class="card-image">
+            <img src="@game.PictureUrl" alt="@game.Name" />
+            @if (game.LastPlayedDate.HasValue)
+            {
+                <div class="progress-bar">
+                    <div class="progress" style="width: @GetProgressWidth(game)%"></div>
+                </div>
+            }
+        </div>
+        <div class="card-content">
+            <h3 class="game-title">@game.Name</h3>
+            <p class="game-brief">@(game.Description?.Length > 50 ? game.Description[..50] + "..." : game.Description)</p>
+            <p class="game-genre">@game.Genre.Name</p>
+        </div>
+    </FluentCard>
+}
 
-
-<FluentDialog @ref="_myFluentDialog" @bind-Hidden="Hidden" AriaLabel="Game Details" Modal="true" TrapFocus="true" PreventScroll="false">
+<FluentDialog @ref="_myFluentDialog" @bind-Hidden="Hidden" AriaLabel="Game Details" Modal="true">
     <FluentDialogHeader>
         <h2>@_selectedGame?.Name</h2>
     </FluentDialogHeader>
@@ -31,26 +28,18 @@
         @if (_selectedGame != null)
         {
             <div class="dialog-content">
-                <img src="@_selectedGame.PictureUrl" alt="@_selectedGame.Name" class="dialog-image"/>
+                <img src="@_selectedGame.PictureUrl" alt="@_selectedGame.Name" class="dialog-image" />
                 <p class="game-description">@_selectedGame.Description</p>
                 <div class="game-details">
-                    <p>
-                        <strong>Created:</strong> @_selectedGame.CreatedAt.ToShortDateString()
-                    </p>
-                    <p>
-                        <strong>Genre:</strong> @_selectedGame.Genre.Name
-                    </p>
+                    <p><strong>Created:</strong> @_selectedGame.CreatedAt.ToShortDateString()</p>
+                    <p><strong>Genre:</strong> @_selectedGame.Genre.Name</p>
                     @if (_selectedGame.Developer != null)
                     {
-                        <p>
-                            <strong>Developer:</strong> @_selectedGame.Developer
-                        </p>
+                        <p><strong>Developer:</strong> @_selectedGame.Developer</p>
                     }
                     @if (_selectedGame.LastPlayedDate.HasValue)
                     {
-                        <p>
-                            <strong>Last Played:</strong> @_selectedGame.LastPlayedDate.Value.ToShortDateString()
-                        </p>
+                        <p><strong>Last Played:</strong> @_selectedGame.LastPlayedDate.Value.ToShortDateString()</p>
                     }
                 </div>
             </div>

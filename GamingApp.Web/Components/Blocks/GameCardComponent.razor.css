@@ -1,61 +1,91 @@
-.game-card-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* More space */
-    gap: 25px; /* Increase spacing */
-    padding: 20px;
-}
-
 .game-card {
-    background-color: var(--background-color);
-    box-shadow: 0 4px 8px #000000;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Subtle transition */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .game-card:hover {
-    transform: scale(1.05); /* Smooth scaling */
-    box-shadow: 0 8px 20px #000000;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
-    border: 2px solid var(--accent-color); /* Pe165 */
-    outline: 2px solid var(--primary-color); /* Pe165 */
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .card-image {
     position: relative;
-    height: 180px; /* Smaller image to fit better */
+    height: 200px;
+    overflow: hidden;
 }
 
 .card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s, filter 0.3s;
-    border-radius: 8px 8px 0 0; /* Rounded corners for images */
+    transition: transform 0.3s ease;
 }
 
 .game-card:hover .card-image img {
-    filter: brightness(110%);
-    transform: scale(1.05); /* Slight zoom effect */
+    transform: scale(1.05);
 }
 
-.card-content { padding: 15px; }
+.card-content {
+    padding: var(--spacing-medium);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
 
-.card-content h3 {
-    margin: 0 0 10px;
+.game-title {
     font-size: 1.2rem;
+    margin-bottom: var(--spacing-small);
     color: var(--primary-color);
 }
 
 .game-brief {
     font-size: 0.9rem;
-    color: var(--secondary-color);
+    color: var(--text-color);
+    margin-bottom: var(--spacing-small);
+    flex-grow: 1;
 }
 
 .game-genre {
-    font-size: 0.85rem;
-    color: var(--accent-color); 
-    margin-top: 5px;
+    font-size: 0.8rem;
+    color: var(--accent-color);
+}
+
+.progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.progress {
+    height: 100%;
+    background-color: var(--accent-color);
+}
+
+.dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-medium);
+}
+
+.dialog-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+}
+
+.game-description {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.game-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-small);
 }

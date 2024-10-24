@@ -3,19 +3,24 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GamingApp.ApiService.Data.Models;
 
-public class User
+public class User(
+    string identityServerSid,
+    string username,
+    string email,
+    DateTime createdAt,
+    string inGameUserName)
 {
     public int Id { get; init; }
 
-    [Required] public string IdentityServerSid { get; init; }
+    [Required] public string IdentityServerSid { get; init; } = identityServerSid;
 
-    [Required] public string Username { get; init; }
+    [Required] public string Username { get; init; } = username;
 
-    [Required] public string Email { get; init; }
+    [Required] public string Email { get; init; } = email;
 
-    public DateTime CreatedAt { get; init; }
+    public DateTime CreatedAt { get; init; } = createdAt;
 
-    [Required] public string InGameUserName { get; init; }
+    [Required] public string InGameUserName { get; init; } = inGameUserName;
 
     public string? FavoriteGame { get; init; }
 
@@ -24,9 +29,9 @@ public class User
     public string? Status { get; init; }
 
     // Navigation properties
-    public ICollection<GameSession> GameSessions { get; init; } = new List<GameSession>();
-    public ICollection<Achievement> AchievementsUnlocked { get; init; } = new List<Achievement>();
-    public ICollection<Game> PlayedGames { get; init; } = new List<Game>();
+    public ICollection<GameSession> GameSessions { get; init; } = [];
+    public ICollection<Achievement> AchievementsUnlocked { get; init; } = [];
+    public ICollection<Game> PlayedGames { get; init; } =  [];
 
     [NotMapped]
     public TimeSpan TotalPlayTime => TimeSpan.FromTicks(GameSessions.Sum(gs => (gs.EndTime - gs.StartTime).Ticks));
@@ -39,14 +44,5 @@ public class User
             .OrderByDescending(a => a.Score)
             .Take(count)
             .ToList();
-    }
-
-    public User(string identityServerSid, string username, string email, DateTime createdAt, string inGameUserName)
-    {
-        IdentityServerSid = identityServerSid;
-        Username = username;
-        Email = email;
-        CreatedAt = createdAt;
-        InGameUserName = inGameUserName;
     }
 }

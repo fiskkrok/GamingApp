@@ -1,0 +1,26 @@
+﻿@* @inject IDialogService DialogService
+
+<FluentButton BackgroundColor="var(--neutral-layer-4)" OnClick="OpenSiteSettingsAsync" Title="Friends">
+    <FluentIcon Value="@(new Icons.Regular.Size20.PeopleAudience())" Color="Color.Neutral" Title="Friends" />
+</FluentButton>
+
+@code{
+    private IDialogReference? _dialog;
+
+    public async Task OpenSiteSettingsAsync()
+    {
+        _dialog = await DialogService.ShowPanelAsync<FriendList>(new DialogParameters()
+        {
+            ShowTitle = false,
+            Title = "Friends",
+            Alignment = HorizontalAlignment.Center,
+            Height = "600px",
+                DialogType = DialogType.Dialog,
+            PrimaryAction = "",
+            SecondaryAction = null,
+            ShowDismiss = false
+        });
+
+        DialogResult result = await _dialog.Result;
+    }
+} *@

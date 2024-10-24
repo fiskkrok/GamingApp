@@ -1,0 +1,47 @@
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--background-color-dark);
+}
+
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: var(--primary-color);
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.friend-list-sidebar {
+    width: 250px;
+    background-color: var(--secondary-color);
+    overflow-y: auto;
+    padding: var(--spacing-medium);
+}
+
+.content-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-medium);
+}
+
+.app-footer {
+    background-color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+
+    .friend-list-sidebar {
+        width: 100%;
+        max-height: 200px;
+    }
+}

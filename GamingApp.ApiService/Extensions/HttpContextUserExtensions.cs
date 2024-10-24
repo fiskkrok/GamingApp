@@ -1,7 +1,6 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
-namespace GamingApp.ApiService;
+namespace GamingApp.ApiService.Extensions;
 
 public static class HttpContextUserExtensions
 {

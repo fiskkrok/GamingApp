@@ -4,45 +4,50 @@
 
 <AuthorizeView>
     <Authorized>
-        <FluentStack HorizontalAlignment="HorizontalAlignment.End" VerticalAlignment="VerticalAlignment.Center">
-            <button @onclick="@(() => NavManager.NavigateTo("/notifications"))" class="menu-button">
-                <FluentIcon Value="@(new Icons.Regular.Size24.Alert())" Color="Color.Accent" />
+        <div class="user-menu">
+            <FluentButton Style="background-color: transparent" @onclick="@(() => NavManager.NavigateTo("/notifications"))" aria-label="Notifications">
+                <FluentIcon Value="@(new Icons.Regular.Size20.Alert())"  />
                 @if (_notificationCount > 0)
                 {
-                    <FluentBadge Appearance="Appearance.Accent" Color="Color.Accent" Data="@_notificationCount.ToString()" />
+                    <FluentBadge Appearance="Appearance.Accent" Data="@_notificationCount.ToString()" />
                 }
-            </button>
-            <button @onclick="@(() => NavManager.NavigateTo("/messages"))" class="menu-button">
-                <FluentIcon Value="@(new Icons.Regular.Size24.ChatBubblesQuestion())" Color="Color.Accent" />
+            </FluentButton>
+
+            <FluentButton Style="background-color: transparent" @onclick="@(() => NavManager.NavigateTo("/messages"))" aria-label="Messages">
+                <FluentIcon Value="@(new Icons.Regular.Size20.ChatBubblesQuestion())"  />
                 @if (_unreadMessageCount > 0)
                 {
-                    <FluentBadge Appearance="Appearance.Accent" Color="Color.Accent" Data="@_unreadMessageCount.ToString()" />
+                    <FluentBadge Appearance="Appearance.Accent" Data="@_unreadMessageCount.ToString()" />
                 }
-            </button>
-            <button @onclick="@(() => open = !open)" Id="btnOpen1" class="menu-button">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                <p class="userName">@userName</p>
-                <FluentIcon Value="@(new Icons.Regular.Size24.Person())" Color="Color.Accent"/>
-                </div>
-            </button>
-            <FluentMenu Anchor="btnOpen1" @bind-Open="open" HorizontalPosition="HorizontalPosition.Center">
-                <div class="btn-group">
-                    <button onclick="@(() => NavManager.NavigateTo("/profile"))" class="btn btn-light">Profile</button>
-                    <button onclick="@(() => NavManager.NavigateTo("/settings"))" class="btn btn-light">Settings</button>
-                <form method="post" action="user/signout" @formname="logout" style="color: transparent;">
-                    <AntiforgeryToken />
-                        <button class="btn btn-light" type="submit">Log out</button>
-                </form>
-                </div>
-            </FluentMenu>
-        </FluentStack>
+            </FluentButton>
+
+            <FluentButton Id="userMenuPopover" Style="background-color: transparent" @onclick="() => _isMenuOpen = !_isMenuOpen" aria-label="User menu">
+                <FluentIcon Value="@(new Icons.Regular.Size20.Person())"  />
+                <span class="user-name">@userName</span>
+            </FluentButton>
+
+            <FluentPopover @bind-Open="_isMenuOpen" AnchorId="userMenuPopover">
+                <Body>
+                    <nav class="user-menu-nav">
+                        <FluentAnchor Href="/profile" IconStart="@(new Icons.Regular.Size16.Person())">Profile</FluentAnchor>
+                        <FluentAnchor Href="/settings" IconStart="@(new Icons.Regular.Size16.Settings())">Settings</FluentAnchor>
+                        <FluentDivider Role="DividerRole.Presentation"  />
+                        <form method="post" action="user/signout" @formname="logout">
+                            <AntiforgeryToken />
+                            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Lightweight" IconStart="@(new Icons.Filled.Size20.ArrowExit())">Log out</FluentButton>
+                        </form>
+                    </nav>
+                </Body>
+            </FluentPopover>
+        </div>
     </Authorized>
 </AuthorizeView>
 
 @code {
     [CascadingParameter]
     public HttpContext? HttpContext { get; set; }
-    private bool open = false;
+
+    private bool _isMenuOpen = false;
     private int _notificationCount = 10;
     private int _unreadMessageCount = 10;
     private string? userName;

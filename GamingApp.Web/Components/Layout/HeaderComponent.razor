@@ -1,18 +1,26 @@
 ﻿@using GamingApp.Web.Components.Blocks
 @inject NavigationManager NavManager
-<header class="header">
-    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-        <div class="logo">Pixel Quest</div>
-        <button @onclick="@(() => NavManager.NavigateTo("/"))" class="menu-button">
-            <FluentIcon Value="@(new Icons.Regular.Size24.Home())" Color="Color.Accent" />
-        </button>
-        <button @onclick="@(() => NavManager.NavigateTo("/games"))" class="menu-button">
-            <FluentIcon Value="@(new Icons.Regular.Size24.Games())" Color="Color.Accent" />
-        </button>
-        <button @onclick="@(() => NavManager.NavigateTo("/categories"))" class="menu-button">
-            <FluentIcon Value="@(new Icons.Filled.Size24.Options())" Color="Color.Accent" />
-        </button>
-        <FluentSpacer />
-        <UserMenu />
-    </FluentStack>
-</header>
+
+<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" class="header-content">
+    <div class="logo" @onclick="@(() => NavManager.NavigateTo("/"))">Pixel Quest</div>
+    <nav class="main-nav">
+        <NavLink href="/" Match="NavLinkMatch.All" class="nav-link" ActiveClass="active">
+            <FluentIcon Value="@(new Icons.Regular.Size24.Home().WithColor("#ffffff"))" />
+            <span class="nav-text">Home</span>
+        </NavLink>
+        <NavLink href="/games" class="nav-link" ActiveClass="active">
+            <FluentIcon Value="@(new Icons.Regular.Size24.Games().WithColor("#ffffff"))" />
+            <span class="nav-text">Games</span>
+        </NavLink>
+        <NavLink href="/categories" class="nav-link" ActiveClass="active">
+            <FluentIcon Value="@(new Icons.Regular.Size24.Options().WithColor("#ffffff"))" />
+            <span class="nav-text">Categories</span>
+        </NavLink>
+        <NavLink href="/leaderboard" class="nav-link" ActiveClass="active">
+            <FluentIcon Value="@(new Icons.Regular.Size24.Trophy().WithColor("#ffffff"))" />
+            <span class="nav-text">Leaderboard</span>
+        </NavLink>
+    </nav>
+    <FluentSpacer />
+    <UserMenu />
+</FluentStack>

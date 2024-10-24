@@ -4,43 +4,49 @@
 @inject CategoryApiClient CategoryApiClient
 @inject NavigationManager NavigationManager
 
-<FluentCard>
-    <h1 class="page-title">Game Categories</h1>
+<PageTitle>Game Categories - Pixel Quest</PageTitle>
 
-    @if (_loading)
-    {
-        <FluentProgressRing/>
-    }
-    else if (_error)
-    {
-        <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
-            @_errorMessage
-        </FluentMessageBar>
-    }
-    else if (!_categories.Any())
-    {
-        <FluentMessageBar Title="No categories found" Intent="MessageIntent.Warning">
-            Check back later for new categories!
-        </FluentMessageBar>
-    }
-    else
-    {
-        <FluentGrid Columns="4" ColumnSpan="1">
-            @foreach (var category in _categories)
-            {
-                <FluentGridItem>
+<div class="container">
+    <div class="dashboard-wrapper">
+        <h1 class="page-title">Game Categories</h1>
+        <p class="text-center mb-3">Explore our diverse collection of game genres!</p>
+
+        @if (_loading)
+        {
+            <div class="text-center">
+                <FluentProgressRing />
+            </div>
+        }
+        else if (_error)
+        {
+            <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
+                @_errorMessage
+            </FluentMessageBar>
+        }
+        else if (!_categories.Any())
+        {
+            <FluentMessageBar Title="No categories found" Intent="MessageIntent.Warning">
+                Check back later for new categories!
+            </FluentMessageBar>
+        }
+        else
+        {
+            <div class="grid grid-cols-3 gap-4">
+                @foreach (var category in _categories)
+                {
                     <FluentCard class="category-card" @onclick="() => NavigateToCategory(category.Id)">
-                        <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center">
-                            <FluentIcon Value="@(new Icons.Regular.Size48.Options())"/>
-                            <h3>@category.Name</h3>
-                            <span>@category.GameCount games</span>
-                        </FluentStack>
+                        <div class="category-icon">
+                            <FluentIcon Value="@(new Icons.Regular.Size48.Games())" Color="Color.Accent" />
+                        </div>
+                        <h3>@category.Name</h3>
+                        <p class="category-description">@(category.Description ?? "Explore games in this category")</p>
+                        <span class="game-count">@category.GameCount @(category.GameCount == 1 ? "game" : "games")</span>
                     </FluentCard>
-                </FluentGridItem>
-            }
-        </FluentGrid>
-    }
-</FluentCard>
+                }
+            </div>
+        }
+    </div>
+</div>
 
 @code {
     private IEnumerable<Category> _categories = Enumerable.Empty<Category>();
@@ -70,5 +76,4 @@
     {
         NavigationManager.NavigateTo($"/games?category={categoryId}");
     }
-
 }

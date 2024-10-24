@@ -7,7 +7,7 @@ namespace GamingApp.Web.Clients;
 
 public class GameApiClient(HttpClient httpClient)
 {
-    public async Task<IEnumerable<Game>> GetGamesAsync(int maxItems = 10)
+    public async Task<IEnumerable<Game>> GetGamesAsync(int maxItems = 20)
     {
         return await GetFromApiAsync<List<Game>>($"/games/{maxItems}") ?? Enumerable.Empty<Game>();
     }

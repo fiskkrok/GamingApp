@@ -1,50 +1,39 @@
-/*.user-menu-container {
-    position: relative;*/ /* Ensure the dropdown stays with the button */
-/*}
-
-.dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background-color: #333;*/ /* Dark background for the dropdown */
-    /*border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    display: none;
-    padding: 10px 0;
-    width: 200px;
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-small);
 }
 
-.user-menu-container:hover .dropdown-menu {
-    display: block;*/ /* Show menu on hover */
-/*}
+.user-name {
+    margin-left: var(--spacing-small);
+    font-weight: 500;
+}
 
-.dropdown-item {
-    display: block;
-    padding: 10px 20px;
-    color: white;
-    text-align: left;
-    text-decoration: none;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
+.user-menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-small);
+    padding: var(--spacing-small);
+}
+
+::deep .user-menu-nav .fluent-anchor,
+::deep .user-menu-nav .fluent-button {
+    justify-content: flex-start;
     width: 100%;
+    padding: var(--spacing-small) var(--spacing-medium);
 }
 
-.dropdown-item:hover {
-    background-color: #444;*/ /* Highlight on hover */
-/*}
-
-.dropdown-button {
-    color: white;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    text-align: left;
-    padding: 10px 20px;
+::deep .user-menu-nav .fluent-anchor:hover,
+::deep .user-menu-nav .fluent-button:hover {
+    background-color: var(--neutral-layer-2);
 }
 
-.dropdown-button:hover {
-    background-color: #444;
-}*/
+::deep .user-menu-nav .fluent-divider {
+    margin: var(--spacing-small) 0;
+}
+
+@media (max-width: 768px) {
+    .user-name {
+        display: none;
+    }
+}

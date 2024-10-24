@@ -5,33 +5,33 @@
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.0.0-preview.4.24504.11" />
-    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="9.0.0-preview.4.24504.11" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="9.0.0-preview.4.24504.11" />
-    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.2.1" />
-    <PackageVersion Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.0.0-preview.4.24504.11" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.1.0-preview.1.24519.3" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="9.1.0-preview.1.24519.3" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="9.1.0-preview.1.24519.3" />
+    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.1.0-preview.1.24519.3" />
+    <PackageVersion Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.1.0-preview.1.24519.3" />
     <PackageVersion Include="Duende.IdentityServer" Version="7.0.7" />
     <PackageVersion Include="IdentityModel" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.0-rc.1.24452.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0-rc.1.24452.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.0-rc.1.24452.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.0-rc.1.24451.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0-rc.1.24451.1" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0-preview.8.24460.1" />
-    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.0.0-preview.4.24504.11" />
-    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.10.2-preview.24278.2" />
-    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.DataGrid.EntityFrameworkAdapter" Version="4.10.1" />
-    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.10.1" />
-    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.1" />
-    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.1.1" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-rc.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.0-rc.2.24474.3" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0-rc.2.24474.3" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.0-rc.2.24474.3" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.0-rc.2.24474.1" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0-rc.2.24474.1" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0-preview.9.24517.2" />
+    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.1.0-preview.1.24519.3" />
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.10.3-preview.24292.2" />
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.DataGrid.EntityFrameworkAdapter" Version="4.10.2" />
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.10.2" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.2" />
+    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.1.2" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-rc.2" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.10.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
     <PackageVersion Include="Polly" Version="8.4.2" />
-    <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
     <PackageVersion Include="StatefulReconnection" Version="0.1.0" />
   </ItemGroup>
 </Project>

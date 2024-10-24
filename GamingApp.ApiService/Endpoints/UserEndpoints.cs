@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using GamingApp.ApiService.Data;
 using GamingApp.ApiService.Data.Models;
+using GamingApp.ApiService.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GamingApp.ApiService.Endpoints;

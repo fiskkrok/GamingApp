@@ -1,0 +1,111 @@
+.logo {
+    font-family: var(--font-header);
+    font-size: 1.5rem;
+    color: var(--background-color);
+    text-shadow: 2px 2px var(--accent-color);
+    margin-right: var(--spacing-large);
+    letter-spacing: 2px;
+    cursor: pointer;
+}
+
+.header-content {
+    padding: var(--spacing-medium);
+    color: var(--background-color);
+    margin-bottom: var(--spacing-medium);
+    position: relative; /* Add this to contain absolute positioning */
+    overflow: visible; /* Allow content to overflow outside the header */
+}
+
+.main-nav {
+    display: flex;
+    justify-content: center; /* Center icons horizontally */
+    align-items: center;
+    position: relative; /* For positioning child elements */
+}
+
+.nav-link {
+    position: relative; /* For positioning the hover text */
+}
+
+    .nav-link .nav-text {
+        visibility: hidden;
+        position: absolute;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        top: 100%; /* Position text below the icon */
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: transparent;
+        color: var(--background-color);
+        text-shadow: 2px 2px var(--accent-color);
+        font-size: 1.5rem;
+        font-weight: bold;
+        padding: var(--spacing-small);
+        border-radius: var(--border-radius);
+        white-space: nowrap;
+        z-index: 1; /* Ensure text appears above other elements */
+        box-shadow: 5px 5px;
+    }
+
+    .nav-link:hover .nav-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+.nav-link {
+    position: relative;
+    color: var(--background-color);
+    text-decoration: none;
+    padding: var(--spacing-small) var(--spacing-medium);
+    margin-right: var(--spacing-small);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    transition: background-color 0.3s ease;
+}
+
+    .nav-link.active {
+        background-color: white;
+    }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: white;
+        }
+
+.main-nav .fluent-nav-link {
+    color: var(--background-color);
+    text-decoration: none;
+    padding: var(--spacing-small) var(--spacing-medium);
+    margin-right: var(--spacing-small);
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease;
+}
+
+    .main-nav .fluent-nav-link:hover,
+    .main-nav .fluent-nav-link.active {
+        background-color: var(--accent-color);
+    }
+
+.main-nav .fluent-icon {
+    margin: 0; /* Remove margin to center icons */
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        align-items: center; /* Center content on small screens */
+    }
+
+    .logo {
+        margin-bottom: var(--spacing-medium);
+    }
+
+    .main-nav {
+        width: 100%;
+        overflow-x: auto;
+    }
+}

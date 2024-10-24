@@ -7,59 +7,95 @@
 @inject IToastService ToastService
 @attribute [Authorize]
 
-<PageTitle>User Profile - Game Portal</PageTitle>
+<PageTitle>User Profile - Pixel Quest</PageTitle>
 
-@if (_loading)
-{
-    <FluentProgressRing/>
-}
-else if (_error)
-{
-    <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
-        @_errorMessage
-    </FluentMessageBar>
-}
-else if (_userProfile == null)
-{
-    <FluentCard>
-        <h2>Welcome to Gaming Portal!</h2>
-        <p>You don't seem to have a Game Account yet.</p>
-        <FluentButton Appearance="Appearance.Accent" OnClick="PromptCreateAccount">Create Game Account</FluentButton>
-    </FluentCard>
-}
-else
-{
-    <FluentCard>
-        <h2>About Me</h2>
-        <p>@_userProfile.Bio</p>
-    </FluentCard>
+<div class="container">
+    <div class="dashboard-wrapper">
+        <h1 class="page-title">@(_userProfile != null ? $"Profile of {_userProfile.InGameUserName}" : "Welcome to Pixel Quest!")</h1>
 
-    <FluentCard class="mt-4">
-        <h2>Gaming Stats</h2>
-        <FluentGrid Columns="3" ColumnSpan="1">
-            <FluentGridItem>
-                <h3>Total Play Time</h3>
-                <span>@_userProfile.TotalPlayTime.TotalHours.ToString("F1") hours</span>
-            </FluentGridItem>
-            <FluentGridItem>
-                <h3>Games Played</h3>
-                <span>@_userProfile.GamesPlayed.Count</span>
-            </FluentGridItem>
-            <FluentGridItem>
-                <h3>Achievements Unlocked</h3>
-                <span>@_userProfile.AchievementsUnlocked.Count</span>
-            </FluentGridItem>
-        </FluentGrid>
-    </FluentCard>
+        @if (_loading)
+        {
+            <FluentProgressRing />
+        }
+        else if (_error)
+        {
+            <FluentMessageBar Title="Error" Intent="MessageIntent.Error">
+                @_errorMessage
+            </FluentMessageBar>
+        }
+        else if (_userProfile == null)
+        {
+            <div class="card text-center">
+                <h2 class="mb-2">Create Your Game Account</h2>
+                <p class="mb-2">You don't seem to have a Game Account yet. Let's create one!</p>
+                <FluentButton Appearance="Appearance.Accent" OnClick="PromptCreateAccount">Create Game Account</FluentButton>
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-3 gap-4">
+                <div class="card">
+                    <h2 class="mb-2">About Me</h2>
+                    @if (string.IsNullOrWhiteSpace(_userProfile.Bio))
+                    {
+                        <p>Tell us about yourself!</p>
+                        <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => EditBio())">Add Bio</FluentButton>
+                    }
+                    else
+                    {
+                        <p>@_userProfile.Bio</p>
+                        <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => EditBio())">Edit Bio</FluentButton>
+                    }
+                </div>
 
-    <FluentCard class="mt-4">
-        <h2>Recent Achievements</h2>
-        <FluentDataGrid Items="_userProfile.RecentAchievements().AsQueryable()" GridTemplateColumns="auto 1fr auto">
-            <PropertyColumn Property="@(a => a.Name)" Title="Achievement"/>
-            <PropertyColumn Property="@(a => a.UnlockedDate)" Title="Unlocked" Format="MMM dd, yyyy"/>
-        </FluentDataGrid>
-    </FluentCard>
-}
+                <div class="card">
+                    <h2 class="mb-2">Gaming Stats</h2>
+                    <div class="d-flex flex-column">
+                        <span class="mb-1"><strong>Total Play Time:</strong> @_userProfile.TotalPlayTime.TotalHours.ToString("F1") hours</span>
+                        <span class="mb-1"><strong>Games Played:</strong> @_userProfile.GamesPlayed.Count</span>
+                        <span><strong>Achievements Unlocked:</strong> @_userProfile.AchievementsUnlocked.Count</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="mb-2">Recent Achievements</h2>
+                    @if (_userProfile.RecentAchievements().Any())
+                    {
+                        <FluentDataGrid Items="_userProfile.RecentAchievements().AsQueryable()" GridTemplateColumns="auto 1fr auto">
+                            <PropertyColumn Property="@(a => a.Name)" Title="Achievement" />
+                            <PropertyColumn Property="@(a => a.UnlockedDate)" Title="Unlocked" Format="MMM dd, yyyy" />
+                        </FluentDataGrid>
+                    }
+                    else
+                    {
+                        <p>No achievements unlocked yet. Start playing to earn some!</p>
+                    }
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <h2 class="mb-2">Favorite Games</h2>
+                @if (_userProfile.GamesPlayed.Any())
+                {
+                    <div class="grid grid-cols-4 gap-4">
+                        @foreach (var game in _userProfile.GamesPlayed.Take(4))
+                        {
+                            <div class="card text-center">
+                                <img src="@game.PictureUrl" alt="@game.Name" class="mb-2" style="width: 100%; height: 150px; object-fit: cover;" />
+                                <h3 class="mb-1">@game.Name</h3>
+                                <p>Last played: @(game.LastPlayedDate?.ToString("MMM dd, yyyy") ?? "Never")</p>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p>You haven't played any games yet. Check out our <a href="/games">Games Library</a> to get started!</p>
+                }
+            </div>
+        }
+    </div>
+</div>
 
 @code {
     private UserProfile? _userProfile;
@@ -78,7 +114,6 @@ else
         {
             if (ex is HttpRequestException httpEx && httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                // User doesn't exist in the backend
                 _userProfile = null;
             }
             else
@@ -86,23 +121,22 @@ else
                 _error = true;
                 _errorMessage = $"Error loading user profile: {ex.Message}";
             }
-
             _loading = false;
         }
     }
 
     private async Task PromptCreateAccount()
     {
-        var dialogParameters = new DialogParameters()
-        {
-            Title = "Create Game Account",
-            PrimaryAction = "Create",
-            SecondaryAction = "Cancel",
-            Width = "400px",
-            Height = "300px",
-            PreventDismissOnOverlayClick = true,
-            PreventScroll = true
-        };
+        var dialogParameters = new DialogParameters
+            {
+                Title = "Create Game Account",
+                PrimaryAction = "Create",
+                SecondaryAction = "Cancel",
+                Width = "400px",
+                Height = "300px",
+                PreventDismissOnOverlayClick = true,
+                PreventScroll = true
+            };
 
         var dialog = await DialogService.ShowDialogAsync<CreateUserProfileDialog>(new CreateUserProfileModel(), dialogParameters);
         var result = await dialog.Result;
@@ -126,4 +160,10 @@ else
         }
     }
 
+    private async Task EditBio()
+    {
+        // Implement bio editing functionality
+        // This could open a dialog or inline editing form
+        await Task.CompletedTask;
+    }
 }

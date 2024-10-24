@@ -1,4 +1,4 @@
-.friend-list-button:hover {
+/*.friend-list-button:hover {
     box-shadow: 1px 1px 7px 1px var(--text-color-secondary);
 }
 .friend-list-button {
@@ -17,5 +17,18 @@
     box-shadow: 1px 1px 7px 1px var(--text-color-secondary);
     text-shadow: 1px 1px #001527;
 }
-
-
+*/
+.dot-Online {
+    height: 10px;
+    width: 10px;
+    background-color: #009600;
+    border-radius: 50%;
+    display: inline-block;
+}
+.dot-Offline {
+    height: 10px;
+    width: 10px;
+    background-color: #808080;
+    border-radius: 50%;
+    display: inline-block;
+}

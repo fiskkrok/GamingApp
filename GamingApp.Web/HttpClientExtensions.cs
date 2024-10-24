@@ -17,7 +17,9 @@ public static class HttpClientExtensions
         return builder;
     }
 
+#pragma warning disable S3260 // Non-derived "private" classes and records should be "sealed"
     private class HttpClientAuthorizationDelegatingHandler : DelegatingHandler
+#pragma warning restore S3260 // Non-derived "private" classes and records should be "sealed"
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
