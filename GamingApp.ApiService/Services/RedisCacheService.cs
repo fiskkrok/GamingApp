@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using Serilog.Context;
 
 namespace GamingApp.ApiService.Services;
 
@@ -25,53 +26,69 @@ public class RedisCacheService : ICacheService
 
     public async Task<T?> GetAsync<T>(string key)
     {
-        try
+        var correlationId = Guid.NewGuid().ToString();
+        using (LogContext.PushProperty("CorrelationId", correlationId))
         {
-            var cached = await _cache.GetStringAsync(key);
-            return string.IsNullOrEmpty(cached) ? default : JsonSerializer.Deserialize<T>(cached, _jsonOptions);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving cached item {Key}", key);
-            return default;
+            try
+            {
+                var cached = await _cache.GetStringAsync(key);
+                return string.IsNullOrEmpty(cached) ? default : JsonSerializer.Deserialize<T>(cached, _jsonOptions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving cached item {Key} with CorrelationId {CorrelationId}", key, correlationId);
+                return default;
+            }
         }
     }
 
     public async Task SetAsync<T>(string key, T value, TimeSpan? expiration = null)
     {
-        try
+        var correlationId = Guid.NewGuid().ToString();
+        using (LogContext.PushProperty("CorrelationId", correlationId))
         {
-            var options = new DistributedCacheEntryOptions
+            try
             {
-                AbsoluteExpirationRelativeToNow = expiration ?? TimeSpan.FromMinutes(DefaultCacheMinutes)
-            };
+                var options = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = expiration ?? TimeSpan.FromMinutes(DefaultCacheMinutes)
+                };
 
-            var serialized = JsonSerializer.Serialize(value, _jsonOptions);
-            await _cache.SetStringAsync(key, serialized, options);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error caching item {Key}", key);
+                var serialized = JsonSerializer.Serialize(value, _jsonOptions);
+                await _cache.SetStringAsync(key, serialized, options);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error caching item {Key} with CorrelationId {CorrelationId}", key, correlationId);
+            }
         }
     }
 
     public async Task RemoveAsync(string key)
     {
-        try
+        var correlationId = Guid.NewGuid().ToString();
+        using (LogContext.PushProperty("CorrelationId", correlationId))
         {
-            await _cache.RemoveAsync(key);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error removing cached item {Key}", key);
+            try
+            {
+                await _cache.RemoveAsync(key);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing cached item {Key} with CorrelationId {CorrelationId}", key, correlationId);
+            }
         }
     }
 
     public async Task RemoveByPrefixAsync(string prefix)
     {
-        // Implementation depends on your Redis setup
-        // This is a placeholder for pattern-based cache invalidation
-        _logger.LogWarning("RemoveByPrefixAsync not implemented");
-        await Task.CompletedTask;
+        var correlationId = Guid.NewGuid().ToString();
+        using (LogContext.PushProperty("CorrelationId", correlationId))
+        {
+            // Implementation depends on your Redis setup
+            // This is a placeholder for pattern-based cache invalidation
+            _logger.LogWarning("RemoveByPrefixAsync not implemented with CorrelationId {CorrelationId}", correlationId);
+            await Task.CompletedTask;
+        }
     }
 }

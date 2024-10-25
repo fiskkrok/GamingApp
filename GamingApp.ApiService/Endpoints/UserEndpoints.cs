@@ -3,6 +3,7 @@ using GamingApp.ApiService.Data;
 using GamingApp.ApiService.Data.Models;
 using GamingApp.ApiService.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Serilog.Context;
 
 namespace GamingApp.ApiService.Endpoints;
 
@@ -20,40 +21,57 @@ public static class UserEndpoints
         ILogger<Program> logger,
         HttpContext httpContext)
     {
-        try
+        var correlationId = httpContext.TraceIdentifier;
+        using (LogContext.PushProperty("CorrelationId", correlationId))
         {
-            var userId = httpContext.GetUserId();
-            var user = await context.Users
-                .Include(u => u.GameSessions)
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
+            try
             {
-                logger.LogWarning("User with ID {UserId} not found", userId);
-                return Results.NotFound($"User with ID {userId} not found");
+                var userId = httpContext.GetUserId();
+                var user = await context.Users
+                    .Include(u => u.GameSessions)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+
+                if (user == null)
+                {
+                    logger.LogWarning("User with ID {UserId} not found", userId);
+                    return Results.NotFound($"User with ID {userId} not found");
+                }
+
+                var userStats = new UserStats
+                {
+                    TotalPlayTime = TimeSpan.FromTicks(user.GameSessions.Sum(gs => (gs.EndTime - gs.StartTime).Ticks)),
+                    GamesPlayed = user.GameSessions.Select(gs => gs.GameId).Distinct().Count(),
+                    AchievementsUnlocked = user.AchievementsUnlocked?.Count ?? 0
+                };
+
+                logger.LogInformation("Retrieved stats for user {UserId}", userId);
+                return Results.Ok(userStats);
             }
-
-            var userStats = new UserStats
+            catch (Exception e)
             {
-                TotalPlayTime = TimeSpan.FromTicks(user.GameSessions.Sum(gs => (gs.EndTime - gs.StartTime).Ticks)),
-                GamesPlayed = user.GameSessions.Select(gs => gs.GameId).Distinct().Count(),
-                AchievementsUnlocked = user.AchievementsUnlocked?.Count ?? 0
-            };
-
-            logger.LogInformation("Retrieved stats for user {UserId}", userId);
-            return Results.Ok(userStats);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error occurred while fetching user stats");
-            return Results.Problem("An error occurred while fetching user stats");
+                logger.LogError(e, "Error occurred while fetching user stats");
+                return Results.Problem("An error occurred while fetching user stats");
+            }
         }
     }
 
     private static async Task<IResult> CheckUsernameUniqueness(AppDbContext context, [FromQuery] string username)
     {
-        var exists = await context.Users.AnyAsync(u => u.InGameUserName == username);
-        return Results.Ok(!exists);
+        var correlationId = Guid.NewGuid().ToString();
+        using (LogContext.PushProperty("CorrelationId", correlationId))
+        {
+            try
+            {
+                var exists = await context.Users.AnyAsync(u => u.InGameUserName == username);
+                return Results.Ok(!exists);
+            }
+            catch (Exception e)
+            {
+                var logger = Log.ForContext<UserEndpoints>();
+                logger.LogError(e, "Error occurred while checking username uniqueness");
+                return Results.Problem("An error occurred while checking username uniqueness");
+            }
+        }
     }
 
     private static async Task<IResult> CreateUserProfile(
@@ -62,31 +80,35 @@ public static class UserEndpoints
         [FromBody] CreateUserProfileRequest? request,
         ILogger<Program> logger)
     {
-        var identityServerSid = httpContext.User.FindFirst("sid")?.Value;
-        if (string.IsNullOrEmpty(identityServerSid)) return Results.Unauthorized();
-
-        try
+        var correlationId = httpContext.TraceIdentifier;
+        using (LogContext.PushProperty("CorrelationId", correlationId))
         {
-            var (name, email) = httpContext.GetNameAndEmail(logger);
+            var identityServerSid = httpContext.User.FindFirst("sid")?.Value;
+            if (string.IsNullOrEmpty(identityServerSid)) return Results.Unauthorized();
 
-            var user = new User
-            (
-                identityServerSid,
-                name,
-                email,
-                DateTime.UtcNow,
-                request?.InGameUserName ?? "Unknown"
-            );
+            try
+            {
+                var (name, email) = httpContext.GetNameAndEmail(logger);
 
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
+                var user = new User
+                (
+                    identityServerSid,
+                    name,
+                    email,
+                    DateTime.UtcNow,
+                    request?.InGameUserName ?? "Unknown"
+                );
 
-            return Results.Ok(user);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error creating user profile");
-            return Results.Problem("An error occurred while creating the user profile.");
+                context.Users.Add(user);
+                await context.SaveChangesAsync();
+
+                return Results.Ok(user);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error creating user profile");
+                return Results.Problem("An error occurred while creating the user profile.");
+            }
         }
     }
 
