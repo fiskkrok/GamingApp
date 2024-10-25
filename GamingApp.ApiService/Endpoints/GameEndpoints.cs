@@ -55,19 +55,18 @@ public static class GameEndpoints
     private static async ValueTask<IResult> GetRecentGamesAsync(
         AppDbContext context,
         ILogger<Program> logger,
-        IDistributedCache cache,
+        ICacheService cache,
         [FromRoute] int count = 10)
     {
         try
         {
-            var cacheKey = $"recentGames_{count}";
-            var cachedRecentGames = await cache.GetStringAsync(cacheKey);
+            var cacheKey = CacheKeys.GetRecentGamesKey(count);
+            var cachedRecentGames = await cache.GetAsync<List<Game>>(cacheKey);
 
-            if (!string.IsNullOrEmpty(cachedRecentGames))
+            if (cachedRecentGames != null)
             {
-                var recentGames = JsonSerializer.Deserialize<List<Game>>(cachedRecentGames);
-                logger.LogInformation("Retrieved {Count} recent games from cache", recentGames.Count);
-                return Results.Ok(recentGames);
+                logger.LogInformation("Retrieved {Count} recent games from cache", cachedRecentGames.Count);
+                return Results.Ok(cachedRecentGames);
             }
 
             var recentGamesFromDb = await context.Games
@@ -75,12 +74,7 @@ public static class GameEndpoints
                 .OrderByDescending(g => g.CreatedAt)
                 .Take(count)
                 .ToListAsync();
-
-            var serializedRecentGames = JsonSerializer.Serialize(recentGamesFromDb);
-            await cache.SetStringAsync(cacheKey, serializedRecentGames, new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            });
+            await cache.SetAsync(cacheKey,recentGamesFromDb);
 
             logger.LogInformation("Retrieved {Count} recent games from database", recentGamesFromDb.Count);
             return Results.Ok(recentGamesFromDb);

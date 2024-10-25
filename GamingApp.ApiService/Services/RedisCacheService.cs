@@ -28,8 +28,7 @@ public class RedisCacheService : ICacheService
         try
         {
             var cached = await _cache.GetStringAsync(key);
-            if (string.IsNullOrEmpty(cached)) return default;
-            return JsonSerializer.Deserialize<T>(cached, _jsonOptions);
+            return string.IsNullOrEmpty(cached) ? default : JsonSerializer.Deserialize<T>(cached, _jsonOptions);
         }
         catch (Exception ex)
         {

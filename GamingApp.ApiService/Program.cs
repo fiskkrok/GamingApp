@@ -1,16 +1,13 @@
 using Microsoft.IdentityModel.Tokens;
 using GamingApp.ApiService.Data;
-using GamingApp.ApiService.Endpoints;
-using GamingApp.ApiService;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AspNetCoreRateLimit;
-using StackExchange.Redis;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
+using GamingApp.ApiService;
+using GamingApp.ApiService.Endpoints;
 using GamingApp.ApiService.Services.Interfaces;
 using GamingApp.ApiService.Services;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,11 +16,8 @@ builder.AddServiceDefaults();
 builder.AddNpgsqlDbContext<AppDbContext>("apiservicedb");
 
 // Add Redis caching configuration
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    options.InstanceName = "GamingApp_";
-});
+builder.AddRedisClient("redis");
+builder.AddRedisDistributedCache("redis");
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -51,6 +45,12 @@ builder.Services.Configure<ClientRateLimitOptions>(builder.Configuration.GetSect
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 builder.Services.AddSingleton<ICacheService, RedisCacheService>();
+
+builder.Services.AddHealthChecks()
+    .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost",
+        name: "redis",
+        failureStatus: HealthStatus.Degraded,
+        tags: new[] { "ready" });
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

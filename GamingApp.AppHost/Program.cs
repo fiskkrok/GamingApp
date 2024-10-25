@@ -11,16 +11,16 @@ var apiserviceDb = postgresServer
 var identityServer = builder.AddProject<IdentityServer>("identityserver").WithExternalHttpEndpoints();
 var identityEndpoint = identityServer
     .GetEndpoint("https");
-var cache = builder.AddRedis("cache");
+var redis = builder.AddRedis("redis");
 
 var apiService = builder.AddProject<GamingApp_ApiService>("apiservice")
     .WithReference(apiserviceDb)
     .WithEnvironment("IdentityUrl", identityEndpoint)
-    .WithReference(cache); // Utilize Redis setup for caching in the API service
+    .WithReference(redis); // Utilize Redis setup for caching in the API service
 
 var clientweb = builder.AddProject<GamingApp_Web>("clientweb")
     .WithExternalHttpEndpoints()
-    .WithReference(cache)
+    .WithReference(redis)
     .WithReference(apiService)
     .WithEnvironment("IdentityUrl", identityEndpoint);
 
