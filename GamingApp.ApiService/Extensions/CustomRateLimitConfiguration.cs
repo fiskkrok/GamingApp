@@ -34,9 +34,13 @@ public class CustomClientResolveContributor : IClientResolveContributor
 
     public async Task<string> ResolveClientAsync(HttpContext httpContext)
     {
-        var clientId = httpContext.Request.Headers["X-ClientId"].FirstOrDefault();
-        _logger.LogInformation("Rate limit check for client: {ClientId}", clientId);
-        return clientId;
+        var correlationId = httpContext.TraceIdentifier;
+        using (LogContext.PushProperty("CorrelationId", correlationId))
+        {
+            var clientId = httpContext.Request.Headers["X-ClientId"].FirstOrDefault();
+            _logger.LogInformation("Rate limit check for client: {ClientId}", clientId);
+            return clientId;
+        }
     }
 
 }
@@ -52,10 +56,14 @@ public class CustomIpResolveContributor : IIpResolveContributor
 
     public string? ResolveIp(HttpContext httpContext)
     {
-        var ip = httpContext.Request.Headers["X-Real-IP"].FirstOrDefault()
-                 ?? httpContext.Connection.RemoteIpAddress?.ToString();
+        var correlationId = httpContext.TraceIdentifier;
+        using (LogContext.PushProperty("CorrelationId", correlationId))
+        {
+            var ip = httpContext.Request.Headers["X-Real-IP"].FirstOrDefault()
+                     ?? httpContext.Connection.RemoteIpAddress?.ToString();
 
-        _logger.LogInformation("Rate limit check for IP: {IP}", ip);
-        return ip;
+            _logger.LogInformation("Rate limit check for IP: {IP}", ip);
+            return ip;
+        }
     }
 }

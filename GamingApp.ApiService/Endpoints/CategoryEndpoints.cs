@@ -3,6 +3,7 @@ using GamingApp.ApiService.Data;
 using GamingApp.ApiService.Data.Models;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
+using Serilog.Context;
 
 namespace GamingApp.ApiService.Endpoints;
 
@@ -16,10 +17,12 @@ public static class CategoryEndpoints
     private static async ValueTask<IResult> GetCategoriesAsync(
         AppDbContext context,
         ILogger<Program> logger,
-        IDistributedCache cache)
+        IDistributedCache cache,
+        HttpContext httpContext)
     {
         var correlationId = Guid.NewGuid().ToString();
         using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+
         {
             try
             {

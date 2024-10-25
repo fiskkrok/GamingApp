@@ -1,0 +1,70 @@
+﻿@using Ljbc1994.Blazor.IntersectionObserver
+@using GamingApp.Web.Models
+@using GamingApp.Web.Services
+@inject IImageOptimizationService ImageService
+@inject IIntersectionObserverService IntersectionObserverService
+
+@if (_isVisible)
+{
+    <FluentCard @onclick="() => OpenGameDetails(Game)" class="game-card">
+        <div class="card-image">
+            <img src="@ImageService.GetOptimizedImageUrl(Game.PictureUrl, 300, 200)"
+                 alt="@Game.Name"
+                 loading="lazy"
+                 decoding="async"
+                 sizes="(max-width: 768px) 100vw, 300px"
+                 onload="this.style.opacity='1'"
+                 style="opacity: 0; transition: opacity 0.3s;" />
+            @if (Game.LastPlayedDate.HasValue)
+            {
+                <div class="progress-bar">
+                    <div class="progress" style="width: @GetProgressWidth()%"></div>
+                </div>
+            }
+        </div>
+        <div class="card-content">
+            <h3 class="game-title">@Game.Name</h3>
+            <p class="game-brief">@(Game.Description?.Length > 50 ? Game.Description[..50] + "..." : Game.Description)</p>
+            <p class="game-genre">@Game.Genre.Name</p>
+        </div>
+    </FluentCard>
+}
+else
+{
+    <div @ref="_elementReference" class="game-card-placeholder">
+        <FluentProgressRing />
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public Game Game { get; set; } = default!;
+    [Parameter] public EventCallback<Game> OnGameSelected { get; set; }
+
+    private bool _isVisible;
+    private ElementReference _elementReference;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var observer = await IntersectionObserverService.Observe(_elementReference, async (entries) =>
+            {
+                if (entries.First().IsIntersecting)
+                {
+                    _isVisible = true;
+                    await InvokeAsync(StateHasChanged);
+                }
+            });
+        }
+    }
+
+    private async Task OpenGameDetails(Game game)
+    {
+        await OnGameSelected.InvokeAsync(game);
+    }
+
+    private int GetProgressWidth()
+    {
+        return Game.LastPlayedDate.HasValue ? 75 : 0;
+    }
+}

@@ -1,16 +1,13 @@
 using Microsoft.IdentityModel.Tokens;
 using GamingApp.ApiService.Data;
-using GamingApp.ApiService.Endpoints;
-using GamingApp.ApiService;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using AspNetCoreRateLimit;
-using StackExchange.Redis;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
+using GamingApp.ApiService;
+using GamingApp.ApiService.Endpoints;
 using GamingApp.ApiService.Services.Interfaces;
 using GamingApp.ApiService.Services;
+
 using GamingApp.ApiService.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,11 +17,8 @@ builder.AddServiceDefaults();
 builder.AddNpgsqlDbContext<AppDbContext>("apiservicedb");
 
 // Add Redis caching configuration
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    options.InstanceName = "GamingApp_";
-});
+builder.AddRedisClient("redis");
+builder.AddRedisDistributedCache("redis");
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -57,6 +51,7 @@ builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 builder.Services.AddLoggingExtensions();
 builder.Services.AddExceptionMiddleware();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -73,11 +68,13 @@ app.UseUserCheck();
 // Add rate limiting middleware
 app.UseIpRateLimiting();
 
+
 // Add global exception handling middleware
 app.UseExceptionMiddleware();
 
 // Add structured logging middleware
 app.UseLoggingMiddleware();
+
 
 app.MapDefaultEndpoints();
 await AppDbContext.EnsureDbCreatedAsync(app.Services);

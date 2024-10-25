@@ -3,6 +3,7 @@ using GamingApp.ApiService.Data;
 using GamingApp.ApiService.Data.Models;
 using GamingApp.ApiService.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Serilog.Context;
 
 namespace GamingApp.ApiService.Endpoints;
 
@@ -20,6 +21,7 @@ public static class UserEndpoints
         ILogger<Program> logger,
         HttpContext httpContext)
     {
+
         var correlationId = Guid.NewGuid().ToString();
         using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
@@ -56,8 +58,21 @@ public static class UserEndpoints
 
     private static async Task<IResult> CheckUsernameUniqueness(AppDbContext context, [FromQuery] string username)
     {
-        var exists = await context.Users.AnyAsync(u => u.InGameUserName == username);
-        return Results.Ok(!exists);
+        var correlationId = Guid.NewGuid().ToString();
+        using (LogContext.PushProperty("CorrelationId", correlationId))
+        {
+            try
+            {
+                var exists = await context.Users.AnyAsync(u => u.InGameUserName == username);
+                return Results.Ok(!exists);
+            }
+            catch (Exception e)
+            {
+                var logger = Log.ForContext<UserEndpoints>();
+                logger.LogError(e, "Error occurred while checking username uniqueness");
+                return Results.Problem("An error occurred while checking username uniqueness");
+            }
+        }
     }
 
     private static async Task<IResult> CreateUserProfile(
@@ -66,8 +81,10 @@ public static class UserEndpoints
         [FromBody] CreateUserProfileRequest? request,
         ILogger<Program> logger)
     {
+
         var correlationId = Guid.NewGuid().ToString();
         using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+
         {
             var identityServerSid = httpContext.User.FindFirst("sid")?.Value;
             if (string.IsNullOrEmpty(identityServerSid)) return Results.Unauthorized();

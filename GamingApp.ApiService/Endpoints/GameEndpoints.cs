@@ -6,6 +6,7 @@ using GamingApp.ApiService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
+using Serilog.Context;
 
 namespace GamingApp.ApiService.Endpoints;
 
@@ -22,10 +23,12 @@ public static class GameEndpoints
         AppDbContext context,
         ILogger<Program> logger,
         ICacheService cache,
-        [FromRoute] int max)
+        [FromRoute] int max,
+        HttpContext httpContext)
     {
         var correlationId = Guid.NewGuid().ToString();
         using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+
         {
             try
             {
@@ -59,8 +62,9 @@ public static class GameEndpoints
     private static async ValueTask<IResult> GetRecentGamesAsync(
         AppDbContext context,
         ILogger<Program> logger,
-        IDistributedCache cache,
-        [FromRoute] int count = 10)
+        ICacheService cache,
+        [FromRoute] int count = 10,
+        HttpContext httpContext)
     {
         var correlationId = Guid.NewGuid().ToString();
         using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
@@ -89,6 +93,7 @@ public static class GameEndpoints
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
                 });
 
+
                 logger.LogInformation("Retrieved {Count} recent games from database", recentGamesFromDb.Count);
                 return Results.Ok(recentGamesFromDb);
             }
@@ -104,10 +109,12 @@ public static class GameEndpoints
         AppDbContext context,
         ILogger<Program> logger,
         IDistributedCache cache,
-        [FromRoute] int count = 10)
+        [FromRoute] int count = 10,
+        HttpContext httpContext)
     {
         var correlationId = Guid.NewGuid().ToString();
         using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+
         {
             try
             {
