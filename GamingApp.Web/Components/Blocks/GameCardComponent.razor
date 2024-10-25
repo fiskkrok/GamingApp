@@ -4,7 +4,7 @@
 {
     <FluentCard @onclick="() => OpenGameDetails(game)" class="game-card">
         <div class="card-image">
-            <img src="@game.PictureUrl" alt="@game.Name" />
+            <img src="@game.PictureUrl" alt="@game.Name" loading="lazy" />
             @if (game.LastPlayedDate.HasValue)
             {
                 <div class="progress-bar">
@@ -28,7 +28,7 @@
         @if (_selectedGame != null)
         {
             <div class="dialog-content">
-                <img src="@_selectedGame.PictureUrl" alt="@_selectedGame.Name" class="dialog-image" />
+                <img src="@_selectedGame.PictureUrl" alt="@_selectedGame.Name" class="dialog-image" loading="lazy" />
                 <p class="game-description">@_selectedGame.Description</p>
                 <div class="game-details">
                     <p><strong>Created:</strong> @_selectedGame.CreatedAt.ToShortDateString()</p>
