@@ -11,6 +11,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using GamingApp.ApiService.Services.Interfaces;
 using GamingApp.ApiService.Services;
+using GamingApp.ApiService.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +52,11 @@ builder.Services.Configure<ClientRateLimitOptions>(builder.Configuration.GetSect
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 builder.Services.AddSingleton<ICacheService, RedisCacheService>();
+
+// Add global exception handling and structured logging with correlation IDs
+builder.Services.AddLoggingExtensions();
+builder.Services.AddExceptionMiddleware();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -66,6 +72,12 @@ app.UseUserCheck();
 
 // Add rate limiting middleware
 app.UseIpRateLimiting();
+
+// Add global exception handling middleware
+app.UseExceptionMiddleware();
+
+// Add structured logging middleware
+app.UseLoggingMiddleware();
 
 app.MapDefaultEndpoints();
 await AppDbContext.EnsureDbCreatedAsync(app.Services);

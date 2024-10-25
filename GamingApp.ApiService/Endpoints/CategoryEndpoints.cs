@@ -18,41 +18,45 @@ public static class CategoryEndpoints
         ILogger<Program> logger,
         IDistributedCache cache)
     {
-        try
+        var correlationId = Guid.NewGuid().ToString();
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
-            var cacheKey = "categories";
-            var cachedCategories = await cache.GetStringAsync(cacheKey);
-
-            if (!string.IsNullOrEmpty(cachedCategories))
+            try
             {
-                var categories = JsonSerializer.Deserialize<List<Category>>(cachedCategories);
-                logger.LogInformation("Retrieved {Count} categories from cache", categories.Count);
-                return Results.Ok(categories);
-            }
+                var cacheKey = "categories";
+                var cachedCategories = await cache.GetStringAsync(cacheKey);
 
-            var categoriesFromDb = await context.Categories
-                .Select(c => new
+                if (!string.IsNullOrEmpty(cachedCategories))
                 {
-                    c.Id,
-                    c.Name,
-                    c.Icon,
-                    GameCount = c.Games.Count
-                })
-                .ToListAsync();
+                    var categories = JsonSerializer.Deserialize<List<Category>>(cachedCategories);
+                    logger.LogInformation("Retrieved {Count} categories from cache", categories.Count);
+                    return Results.Ok(categories);
+                }
 
-            var serializedCategories = JsonSerializer.Serialize(categoriesFromDb);
-            await cache.SetStringAsync(cacheKey, serializedCategories, new DistributedCacheEntryOptions
+                var categoriesFromDb = await context.Categories
+                    .Select(c => new
+                    {
+                        c.Id,
+                        c.Name,
+                        c.Icon,
+                        GameCount = c.Games.Count
+                    })
+                    .ToListAsync();
+
+                var serializedCategories = JsonSerializer.Serialize(categoriesFromDb);
+                await cache.SetStringAsync(cacheKey, serializedCategories, new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                });
+
+                logger.LogInformation("Retrieved {Count} categories from database", categoriesFromDb.Count);
+                return Results.Ok(categoriesFromDb);
+            }
+            catch (Exception e)
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            });
-
-            logger.LogInformation("Retrieved {Count} categories from database", categoriesFromDb.Count);
-            return Results.Ok(categoriesFromDb);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error occurred while fetching categories");
-            return Results.Problem("An error occurred while fetching categories");
+                logger.LogError(e, "Error occurred while fetching categories");
+                return Results.Problem("An error occurred while fetching categories");
+            }
         }
     }
 }
