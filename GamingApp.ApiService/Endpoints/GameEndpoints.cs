@@ -26,8 +26,9 @@ public static class GameEndpoints
         [FromRoute] int max,
         HttpContext httpContext)
     {
-        var correlationId = httpContext.TraceIdentifier;
-        using (LogContext.PushProperty("CorrelationId", correlationId))
+        var correlationId = Guid.NewGuid().ToString();
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+
         {
             try
             {
@@ -65,18 +66,19 @@ public static class GameEndpoints
         [FromRoute] int count = 10,
         HttpContext httpContext)
     {
-        var correlationId = httpContext.TraceIdentifier;
-        using (LogContext.PushProperty("CorrelationId", correlationId))
+        var correlationId = Guid.NewGuid().ToString();
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
             try
             {
-                var cacheKey = CacheKeys.GetRecentGamesKey(count);
-                var cachedRecentGames = await cache.GetAsync<List<Game>>(cacheKey);
+                var cacheKey = $"recentGames_{count}";
+                var cachedRecentGames = await cache.GetStringAsync(cacheKey);
 
-                if (cachedRecentGames != null)
+                if (!string.IsNullOrEmpty(cachedRecentGames))
                 {
-                    logger.LogInformation("Retrieved {Count} recent games from cache", cachedRecentGames.Count);
-                    return Results.Ok(cachedRecentGames);
+                    var recentGames = JsonSerializer.Deserialize<List<Game>>(cachedRecentGames);
+                    logger.LogInformation("Retrieved {Count} recent games from cache", recentGames.Count);
+                    return Results.Ok(recentGames);
                 }
 
                 var recentGamesFromDb = await context.Games
@@ -84,7 +86,13 @@ public static class GameEndpoints
                     .OrderByDescending(g => g.CreatedAt)
                     .Take(count)
                     .ToListAsync();
-                await cache.SetAsync(cacheKey, recentGamesFromDb);
+
+                var serializedRecentGames = JsonSerializer.Serialize(recentGamesFromDb);
+                await cache.SetStringAsync(cacheKey, serializedRecentGames, new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                });
+
 
                 logger.LogInformation("Retrieved {Count} recent games from database", recentGamesFromDb.Count);
                 return Results.Ok(recentGamesFromDb);
@@ -104,8 +112,9 @@ public static class GameEndpoints
         [FromRoute] int count = 10,
         HttpContext httpContext)
     {
-        var correlationId = httpContext.TraceIdentifier;
-        using (LogContext.PushProperty("CorrelationId", correlationId))
+        var correlationId = Guid.NewGuid().ToString();
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+
         {
             try
             {
@@ -154,3 +163,15 @@ public static class GameEndpoints
         }
     }
 }
+
+//// Example: When a game is updated
+//public static async Task<IResult> UpdateGameAsync(
+//    AppDbContext context,
+//    ICacheService cache,
+//    Game game)
+//{
+//    // Update game logic...
+//    await cache.RemoveByPrefixAsync(CacheKeys.Games);
+//    await cache.RemoveByPrefixAsync(CacheKeys.RecommendedGames);
+//    // ...
+//}

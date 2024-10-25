@@ -7,11 +7,8 @@ using GamingApp.ApiService;
 using GamingApp.ApiService.Endpoints;
 using GamingApp.ApiService.Services.Interfaces;
 using GamingApp.ApiService.Services;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Serilog;
-using Serilog.Context;
-using Serilog.Events;
-using System.Diagnostics;
+
+using GamingApp.ApiService.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,18 +47,10 @@ builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 
-builder.Services.AddHealthChecks()
-    .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost",
-        name: "redis",
-        failureStatus: HealthStatus.Degraded,
-        tags: new[] { "ready" })
-    .AddDbContextCheck<AppDbContext>(name: "Database", failureStatus: HealthStatus.Degraded, tags: new[] { "ready" });
+// Add global exception handling and structured logging with correlation IDs
+builder.Services.AddLoggingExtensions();
+builder.Services.AddExceptionMiddleware();
 
-builder.Host.UseSerilog((context, services, configuration) => configuration
-    .ReadFrom.Configuration(context.Configuration)
-    .ReadFrom.Services(services)
-    .Enrich.FromLogContext()
-    .WriteTo.Console());
 
 var app = builder.Build();
 
@@ -79,27 +68,13 @@ app.UseUserCheck();
 // Add rate limiting middleware
 app.UseIpRateLimiting();
 
-app.Use(async (context, next) =>
-{
-    var correlationId = Guid.NewGuid().ToString();
-    context.Response.Headers.Add("X-Correlation-ID", correlationId);
-    LogContext.PushProperty("CorrelationId", correlationId);
 
-    var stopwatch = Stopwatch.StartNew();
-    try
-    {
-        await next.Invoke();
-    }
-    finally
-    {
-        stopwatch.Stop();
-        var logLevel = context.Response.StatusCode >= 500 ? LogEventLevel.Error : LogEventLevel.Information;
-        Log.ForContext("ElapsedMilliseconds", stopwatch.ElapsedMilliseconds)
-            .ForContext("StatusCode", context.Response.StatusCode)
-            .Write(logLevel, "Request {Method} {Path} responded {StatusCode} in {ElapsedMilliseconds}ms",
-                context.Request.Method, context.Request.Path, context.Response.StatusCode, stopwatch.ElapsedMilliseconds);
-    }
-});
+// Add global exception handling middleware
+app.UseExceptionMiddleware();
+
+// Add structured logging middleware
+app.UseLoggingMiddleware();
+
 
 app.MapDefaultEndpoints();
 await AppDbContext.EnsureDbCreatedAsync(app.Services);

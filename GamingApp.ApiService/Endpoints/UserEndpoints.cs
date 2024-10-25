@@ -21,8 +21,9 @@ public static class UserEndpoints
         ILogger<Program> logger,
         HttpContext httpContext)
     {
-        var correlationId = httpContext.TraceIdentifier;
-        using (LogContext.PushProperty("CorrelationId", correlationId))
+
+        var correlationId = Guid.NewGuid().ToString();
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
             try
             {
@@ -80,8 +81,10 @@ public static class UserEndpoints
         [FromBody] CreateUserProfileRequest? request,
         ILogger<Program> logger)
     {
-        var correlationId = httpContext.TraceIdentifier;
-        using (LogContext.PushProperty("CorrelationId", correlationId))
+
+        var correlationId = Guid.NewGuid().ToString();
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+
         {
             var identityServerSid = httpContext.User.FindFirst("sid")?.Value;
             if (string.IsNullOrEmpty(identityServerSid)) return Results.Unauthorized();

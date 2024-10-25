@@ -20,8 +20,9 @@ public static class CategoryEndpoints
         IDistributedCache cache,
         HttpContext httpContext)
     {
-        var correlationId = httpContext.TraceIdentifier;
-        using (LogContext.PushProperty("CorrelationId", correlationId))
+        var correlationId = Guid.NewGuid().ToString();
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+
         {
             try
             {
