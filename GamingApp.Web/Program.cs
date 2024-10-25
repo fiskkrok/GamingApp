@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Security.Claims;
 using Duende.IdentityServer;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -11,7 +12,10 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.FluentUI.AspNetCore.Components;
 using GamingApp.Web.Clients;
+using GamingApp.Web.Services;
+using Ljbc1994.Blazor.IntersectionObserver;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
@@ -19,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire components.
 builder.AddServiceDefaults();
-builder.AddRedisOutputCache("cache");
+builder.AddRedisOutputCache("redis");
 builder.Services.AddFluentUIComponents();
 builder.Services.AddDataGridEntityFrameworkAdapter();
 builder.Services.AddHttpClient<UserApiClient>(client => client.BaseAddress = new Uri(builder.Configuration["backendapi"] ?? throw new InvalidOperationException()))
@@ -74,7 +78,28 @@ builder.Services.AddAuthentication(options =>
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
 
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Optimal;
+});
+
+builder.Services.AddSingleton<IImageOptimizationService, ImageOptimizationService>();
+builder.Services.AddScoped<IIntersectionObserverService, IntersectionObserverService>();
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(builder =>
+        builder.Cache()
+            .SetVaryByHost(false)
+            //.SetVaryByRouteValue(["Games", "Categories" ])
+            .Expire(TimeSpan.FromMinutes(10)));
+});
 
 var app = builder.Build();
 

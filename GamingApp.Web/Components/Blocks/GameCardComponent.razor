@@ -1,23 +1,9 @@
 ﻿@using GamingApp.Web.Models
+@using GamingApp.Web.Services
 
 @foreach (var game in Games)
 {
-    <FluentCard @onclick="() => OpenGameDetails(game)" class="game-card">
-        <div class="card-image">
-            <img src="@game.PictureUrl" alt="@game.Name" loading="lazy" />
-            @if (game.LastPlayedDate.HasValue)
-            {
-                <div class="progress-bar">
-                    <div class="progress" style="width: @GetProgressWidth(game)%"></div>
-                </div>
-            }
-        </div>
-        <div class="card-content">
-            <h3 class="game-title">@game.Name</h3>
-            <p class="game-brief">@(game.Description?.Length > 50 ? game.Description[..50] + "..." : game.Description)</p>
-            <p class="game-genre">@game.Genre.Name</p>
-        </div>
-    </FluentCard>
+    <LazyGameCard Game="game" OnGameSelected="OpenGameDetails" />
 }
 
 <FluentDialog @ref="_myFluentDialog" @bind-Hidden="Hidden" AriaLabel="Game Details" Modal="true">
@@ -67,11 +53,4 @@
     {
         _myFluentDialog!.Hide();
     }
-
-    private int GetProgressWidth(Game game)
-    {
-        // This is a placeholder implementation. You might want to replace this with actual progress logic.
-        return game.LastPlayedDate.HasValue ? 75 : 0;
-    }
-
 }

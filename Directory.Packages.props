@@ -13,6 +13,7 @@
     <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.1.0-preview.1.24521.2" />
     <PackageVersion Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.1.0-preview.1.24519.3" />
     <PackageVersion Include="AspNetCoreRateLimit" Version="5.0.0" />
+    <PackageVersion Include="BlazorIntersectionObserver" Version="3.1.0" />
     <PackageVersion Include="Duende.IdentityServer" Version="7.0.7" />
     <PackageVersion Include="IdentityModel" Version="7.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.0-rc.2.24474.3" />

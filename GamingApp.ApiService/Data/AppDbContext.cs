@@ -294,7 +294,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     private static async Task GenerateMockGameSessions(AppDbContext dbContext, User user)
     {
-        var games = await dbContext.Games.Take(3).ToListAsync();
+        var games = await dbContext.Games.Take(3).OrderBy(a => a.Genre).ToListAsync();
 
         foreach (var gameSession in games.Select(game => new GameSession
         {
