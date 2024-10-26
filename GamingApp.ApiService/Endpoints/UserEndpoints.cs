@@ -9,6 +9,7 @@ using GamingApp.ApiService.Extensions;
 using GamingApp.ApiService.Services.Interfaces;
 
 using Serilog.Context;
+using Microsoft.AspNetCore.Http;
 
 namespace GamingApp.ApiService.Endpoints;
 
@@ -150,15 +151,50 @@ public class CreateUserProfileEndpoint : Endpoint<CreateUserProfileRequest, User
         }
     }
 }
-    //    var validationResult = await _validator.ValidateAsync(parameter);
-    //    if (!validationResult.IsValid)
-    //    {
-    //        return Results.BadRequest(
-    //            validationResult.Errors.Select(e => new ApiError(e.ErrorMessage)));
-    //    }
 
-    //    return await next(context);
-    //}
+
+public class GetUserProfileEndpoint : EndpointWithoutRequest<User>
+{
+
+    public GetUserProfileEndpoint(AppDbContext dbContext)
+    {
+        DbContext = dbContext;
+    }
+
+    private AppDbContext DbContext { get; }
+
+    public override void Configure()
+    {
+        Get("/userProfile");
+    }
+
+    public override async Task HandleAsync(CancellationToken ct)
+    {
+        var correlationId = Guid.NewGuid().ToString();
+        using (Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        {
+        
+
+            try
+            {
+                var identityServerSid = HttpContext.User.FindFirst("sid")?.Value;
+                var user = await DbContext.Users.FirstOrDefaultAsync(o => o.IdentityServerSid.Equals(identityServerSid), cancellationToken: ct);
+                if (user == null)
+                {
+                    Logger.LogWarning("User with ID {UserId} not found", identityServerSid);
+                    await SendNotFoundAsync(ct);
+                    return;
+                }
+                await SendOkAsync(user, ct);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error occurred while fetching user profile");
+                await SendErrorsAsync(500, ct);
+            }
+        }
+    }
+}
 
 public class CreateUserProfileRequest
 {

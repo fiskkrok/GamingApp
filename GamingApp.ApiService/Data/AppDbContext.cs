@@ -22,26 +22,29 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public static async Task EnsureDbCreatedAsync(IServiceProvider services)
     {
         using var scope = services.CreateScope();
-        await using var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var retryPolicy = Policy
-            .Handle<Exception>()
-            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(3));
-
-        await retryPolicy.ExecuteAsync(async () =>
+        await using (var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
         {
-            try
+            var retryPolicy = Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(3));
+
+            await retryPolicy.ExecuteAsync(async () =>
             {
-                await dbContext.Database.MigrateAsync();
-                await InitializeDataAsync(dbContext);
-            }
-            catch (Exception ex)
-            {
-                // Log the error (you can replace this with your logging mechanism)
-                await Console.Error.WriteLineAsync($"An error occurred while ensuring the database is created: {ex.Message}");
-                throw;
-            }
-        });
+                try
+                {
+                    await dbContext.Database.MigrateAsync();
+                    await InitializeDataAsync(dbContext);
+                }
+                catch (Exception ex)
+                {
+                    // Log the error (you can replace this with your logging mechanism)
+                    await Console.Error.WriteLineAsync(
+                        $"An error occurred while ensuring the database is created: {ex.Message}");
+                    throw;
+                }
+            });
+        }
     }
 
     private static async Task InitializeDataAsync(AppDbContext dbContext)
