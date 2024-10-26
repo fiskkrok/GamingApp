@@ -17,7 +17,6 @@ public static class GameSeedData
                 GenreId = categories.First(a => a.Name.Equals("Action")).Id
             },
 
-
             new Game
             {
                 Name = "Mystery Mansion",
@@ -26,7 +25,6 @@ public static class GameSeedData
                 CreatedAt = DateTime.UtcNow,
                 GenreId = categories.First(a => a.Name.Equals("Action")).Id
             },
-
 
             new Game
             {
@@ -37,7 +35,6 @@ public static class GameSeedData
                 GenreId = categories.First(o => o.Name.Equals("Action")).Id
             },
 
-
             new Game
             {
                 Name = "Fantasy Quest",
@@ -46,7 +43,6 @@ public static class GameSeedData
                 CreatedAt = DateTime.UtcNow,
                 GenreId = categories.First(o => o.Name.Equals("Role-Playing")).Id
             },
-
 
             new Game
             {
@@ -57,7 +53,6 @@ public static class GameSeedData
                 GenreId = categories.First(o => o.Name.Equals("Action")).Id
             },
 
-
             new Game
             {
                 Name = "Alien Invasion",
@@ -66,7 +61,6 @@ public static class GameSeedData
                 CreatedAt = DateTime.UtcNow,
                 GenreId = categories.First(o => o.Name.Equals("Action")).Id
             },
-
 
             new Game
             {
@@ -77,7 +71,6 @@ public static class GameSeedData
                 GenreId = categories.First(o => o.Name.Equals("Role-Playing")).Id
             },
 
-
             new Game
             {
                 Name = "Stealth Assassin",
@@ -86,7 +79,6 @@ public static class GameSeedData
                 CreatedAt = DateTime.UtcNow,
                 GenreId = categories.First(o => o.Name.Equals("Action")).Id
             },
-
 
             new Game
             {
@@ -97,7 +89,6 @@ public static class GameSeedData
                 GenreId = categories.First(o => o.Name.Equals("Simulation")).Id
             },
 
-
             new Game
             {
                 Name = "Pirate Adventure",
@@ -106,7 +97,6 @@ public static class GameSeedData
                 CreatedAt = DateTime.UtcNow,
                 GenreId = categories.First(o => o.Name.Equals("Adventure")).Id
             },
-
 
             new Game
             {
@@ -117,7 +107,6 @@ public static class GameSeedData
                 GenreId = categories.First(o => o.Name.Equals("Action")).Id
             },
 
-
             new Game
             {
                 Name = "Medieval Siege",
@@ -126,7 +115,6 @@ public static class GameSeedData
                 CreatedAt = DateTime.UtcNow,
                 GenreId = categories.First(o => o.Name.Equals("Strategy")).Id
             },
-
 
             new Game
             {
@@ -137,7 +125,6 @@ public static class GameSeedData
                 GenreId = categories.First(o => o.Name.Equals("Action")).Id
             },
 
-
             new Game
             {
                 Name = "Super Ninja",
@@ -146,7 +133,6 @@ public static class GameSeedData
                 CreatedAt = DateTime.UtcNow,
                 GenreId = categories.First(o => o.Name.Equals("Action")).Id
             },
-
 
             new Game
             {
@@ -157,7 +143,6 @@ public static class GameSeedData
                 GenreId = categories.First(o => o.Name.Equals("Simulation")).Id
             },
 
-
             new Game
             {
                 Name = "Wild West Showdown",
@@ -167,7 +152,6 @@ public static class GameSeedData
                 GenreId = categories.First(o => o.Name.Equals("Action")).Id
             },
 
-
             new Game
             {
                 Name = "Underwater Exploration",
@@ -176,7 +160,6 @@ public static class GameSeedData
                 CreatedAt = DateTime.UtcNow,
                 GenreId = categories.First(o => o.Name.Equals("Adventure")).Id
             },
-
             new Game
             {
                 Name = "Time Traveler",
@@ -185,7 +168,6 @@ public static class GameSeedData
                 CreatedAt = DateTime.UtcNow,
                 GenreId = categories.First(o => o.Name.Equals("Adventure")).Id
             },
-
             new Game
             {
                 Name = "Survival Island",
@@ -194,7 +176,6 @@ public static class GameSeedData
                 CreatedAt = DateTime.UtcNow,
                 GenreId = categories.First(o => o.Name.Equals("Survival")).Id
             },
-
             new Game
             {
                 Name = "Air Combat",
