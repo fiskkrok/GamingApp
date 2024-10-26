@@ -1,62 +1,57 @@
-﻿@using Ljbc1994.Blazor.IntersectionObserver
-@using GamingApp.Web.Models
+﻿@using GamingApp.Web.Models
 @using GamingApp.Web.Services
 @inject IImageOptimizationService ImageService
-@inject IIntersectionObserverService IntersectionObserverService
 
-@if (_isVisible)
+<LazyLoadComponent TComponent="FluentCard" Parameters="@(new Dictionary<string, object>
 {
-    <FluentCard @onclick="() => OpenGameDetails(Game)" class="game-card">
-        <div class="card-image">
-            <img src="@ImageService.GetOptimizedImageUrl(Game.PictureUrl, 300, 200)"
-                 alt="@Game.Name"
-                 loading="lazy"
-                 decoding="async"
-                 sizes="(max-width: 768px) 100vw, 300px"
-                 onload="this.style.opacity='1'"
-                 style="opacity: 0; transition: opacity 0.3s;" />
-            @if (Game.LastPlayedDate.HasValue)
+    { "onclick", EventCallback.Factory.Create(this, () => OpenGameDetails(Game)) },
+    { "class", "game-card" },
+    { "ChildContent", (RenderFragment)(builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "card-image");
+            builder.OpenElement(2, "img");
+            builder.AddAttribute(3, "src", ImageService.GetOptimizedImageUrl(Game.PictureUrl, 300, 200));
+            builder.AddAttribute(4, "alt", Game.Name);
+            builder.AddAttribute(5, "loading", "lazy");
+            builder.AddAttribute(6, "decoding", "async");
+            builder.AddAttribute(7, "sizes", "(max-width: 768px) 100vw, 300px");
+            builder.AddAttribute(8, "onload", "this.style.opacity='1'");
+            builder.AddAttribute(9, "style", "opacity: 0; transition: opacity 0.3s;");
+            builder.CloseElement();
+            if (Game.LastPlayedDate.HasValue)
             {
-                <div class="progress-bar">
-                    <div class="progress" style="width: @GetProgressWidth()%"></div>
-                </div>
+                builder.OpenElement(10, "div");
+                builder.AddAttribute(11, "class", "progress-bar");
+                builder.OpenElement(12, "div");
+                builder.AddAttribute(13, "class", "progress");
+                builder.AddAttribute(14, "style", $"width: {GetProgressWidth()}%");
+                builder.CloseElement();
+                builder.CloseElement();
             }
-        </div>
-        <div class="card-content">
-            <h3 class="game-title">@Game.Name</h3>
-            <p class="game-brief">@(Game.Description?.Length > 50 ? Game.Description[..50] + "..." : Game.Description)</p>
-            <p class="game-genre">@Game.Genre.Name</p>
-        </div>
-    </FluentCard>
-}
-else
-{
-    <div @ref="_elementReference" class="game-card-placeholder">
-        <FluentProgressRing />
-    </div>
-}
+            builder.CloseElement();
+            builder.OpenElement(15, "div");
+            builder.AddAttribute(16, "class", "card-content");
+            builder.OpenElement(17, "h3");
+            builder.AddAttribute(18, "class", "game-title");
+            builder.AddContent(19, Game.Name);
+            builder.CloseElement();
+            builder.OpenElement(20, "p");
+            builder.AddAttribute(21, "class", "game-brief");
+            builder.AddContent(22, Game.Description?.Length > 50 ? Game.Description[..50] + "..." : Game.Description);
+            builder.CloseElement();
+            builder.OpenElement(23, "p");
+            builder.AddAttribute(24, "class", "game-genre");
+            builder.AddContent(25, Game.Genre.Name);
+            builder.CloseElement();
+            builder.CloseElement();
+        })
+    }
+})" />
 
 @code {
     [Parameter, EditorRequired] public Game Game { get; set; } = default!;
     [Parameter] public EventCallback<Game> OnGameSelected { get; set; }
-
-    private bool _isVisible;
-    private ElementReference _elementReference;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            var observer = await IntersectionObserverService.Observe(_elementReference, async (entries) =>
-            {
-                if (entries.First().IsIntersecting)
-                {
-                    _isVisible = true;
-                    await InvokeAsync(StateHasChanged);
-                }
-            });
-        }
-    }
 
     private async Task OpenGameDetails(Game game)
     {
