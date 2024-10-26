@@ -19,30 +19,37 @@
             builder.AddAttribute(8, "onload", "this.style.opacity='1'");
             builder.AddAttribute(9, "style", "opacity: 0; transition: opacity 0.3s;");
             builder.CloseElement();
+            builder.OpenElement(10, "noscript");
+            builder.OpenElement(11, "img");
+            builder.AddAttribute(12, "src", ImageService.GetOptimizedImageUrl(Game.PictureUrl, 300, 200));
+            builder.AddAttribute(13, "alt", Game.Name);
+            builder.AddAttribute(14, "style", "opacity: 1;");
+            builder.CloseElement();
+            builder.CloseElement();
             if (Game.LastPlayedDate.HasValue)
             {
-                builder.OpenElement(10, "div");
-                builder.AddAttribute(11, "class", "progress-bar");
-                builder.OpenElement(12, "div");
-                builder.AddAttribute(13, "class", "progress");
-                builder.AddAttribute(14, "style", $"width: {GetProgressWidth()}%");
+                builder.OpenElement(15, "div");
+                builder.AddAttribute(16, "class", "progress-bar");
+                builder.OpenElement(17, "div");
+                builder.AddAttribute(18, "class", "progress");
+                builder.AddAttribute(19, "style", $"width: {GetProgressWidth()}%");
                 builder.CloseElement();
                 builder.CloseElement();
             }
             builder.CloseElement();
-            builder.OpenElement(15, "div");
-            builder.AddAttribute(16, "class", "card-content");
-            builder.OpenElement(17, "h3");
-            builder.AddAttribute(18, "class", "game-title");
-            builder.AddContent(19, Game.Name);
+            builder.OpenElement(20, "div");
+            builder.AddAttribute(21, "class", "card-content");
+            builder.OpenElement(22, "h3");
+            builder.AddAttribute(23, "class", "game-title");
+            builder.AddContent(24, Game.Name);
             builder.CloseElement();
-            builder.OpenElement(20, "p");
-            builder.AddAttribute(21, "class", "game-brief");
-            builder.AddContent(22, Game.Description?.Length > 50 ? Game.Description[..50] + "..." : Game.Description);
+            builder.OpenElement(25, "p");
+            builder.AddAttribute(26, "class", "game-brief");
+            builder.AddContent(27, Game.Description?.Length > 50 ? Game.Description[..50] + "..." : Game.Description);
             builder.CloseElement();
-            builder.OpenElement(23, "p");
-            builder.AddAttribute(24, "class", "game-genre");
-            builder.AddContent(25, Game.Genre.Name);
+            builder.OpenElement(28, "p");
+            builder.AddAttribute(29, "class", "game-genre");
+            builder.AddContent(30, Game.Genre.Name);
             builder.CloseElement();
             builder.CloseElement();
         })
