@@ -119,8 +119,8 @@ public class CreateUserProfileEndpoint : Endpoint<CreateUserProfileRequest, User
         var correlationId = Guid.NewGuid().ToString();
         using (Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
-            var identityServerSid = HttpContext.User.FindFirst("sid")?.Value;
-            if (string.IsNullOrEmpty(identityServerSid))
+            var user = await UserHelper.EnsureUserExistsAsync(HttpContext, DbContext);
+            if (user == null)
             {
                 await SendUnauthorizedAsync(ct);
                 return;
@@ -128,17 +128,8 @@ public class CreateUserProfileEndpoint : Endpoint<CreateUserProfileRequest, User
 
             try
             {
-                var (name, email) = HttpContext.GetNameAndEmail(Logger);
-
-                var user = new User(
-                    identityServerSid,
-                    name,
-                    email,
-                    DateTime.UtcNow,
-                    req.InGameUserName
-                );
-
-                DbContext.Users.Add(user);
+                user.InGameUserName = req.InGameUserName;
+                DbContext.Users.Update(user);
                 await DbContext.SaveChangesAsync(ct);
 
                 await SendOkAsync(user, ct);
@@ -173,18 +164,15 @@ public class GetUserProfileEndpoint : EndpointWithoutRequest<User>
         var correlationId = Guid.NewGuid().ToString();
         using (Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
-        
+            var user = await UserHelper.EnsureUserExistsAsync(HttpContext, DbContext);
+            if (user == null)
+            {
+                await SendUnauthorizedAsync(ct);
+                return;
+            }
 
             try
             {
-                var identityServerSid = HttpContext.User.FindFirst("sid")?.Value;
-                var user = await DbContext.Users.FirstOrDefaultAsync(o => o.IdentityServerSid.Equals(identityServerSid), cancellationToken: ct);
-                if (user == null)
-                {
-                    Logger.LogWarning("User with ID {UserId} not found", identityServerSid);
-                    await SendNotFoundAsync(ct);
-                    return;
-                }
                 await SendOkAsync(user, ct);
             }
             catch (Exception e)
@@ -200,4 +188,3 @@ public class CreateUserProfileRequest
 {
     public required string InGameUserName { get; set; }
 }
-
