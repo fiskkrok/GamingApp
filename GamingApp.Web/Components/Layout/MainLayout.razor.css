@@ -17,7 +17,15 @@
     flex: 1;
     overflow: hidden;
 }
-
+.main-card {
+    /* background-color: #014077; */
+    background: #054782;
+    background: rgba(0, 15, 55, 0.1);
+    box-shadow: 10px 10px;
+    min-height: 90%;
+    width: fit-content;
+    justify-self: center;
+}
 .friend-list-sidebar {
     width: 250px;
     background-color: var(--secondary-color);

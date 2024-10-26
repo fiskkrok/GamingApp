@@ -13,10 +13,20 @@
     <PackageReference Include="Aspire.StackExchange.Redis" />
     <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" />
     <PackageReference Include="AspNetCoreRateLimit" />
+    <PackageReference Include="FastEndpoints" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.AspNetCore" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="HtmlSanitizer" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.IdentityModel.Tokens" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Polly" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GamingApp.ServiceDefaults\GamingApp.ServiceDefaults.csproj" />

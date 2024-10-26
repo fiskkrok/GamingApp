@@ -1,14 +1,14 @@
-﻿using GamingApp.ApiService.Data;
-using GamingApp.ApiService.Data.Models;
+using GamingApp.ApiService.Data;
 using GamingApp.ApiService.Endpoints;
 
 namespace GamingApp.ApiService;
 
 public class UserCheckMiddleware(RequestDelegate next)
 {
+    private readonly RequestDelegate _next;
     private readonly ILogger<UserCheckMiddleware> _logger;
 
-    public UserCheckMiddleware(RequestDelegate next, ILogger<UserCheckMiddleware> logger)
+    public UserCheckMiddleware(RequestDelegate next, ILogger<UserCheckMiddleware> logger) : this(next)
     {
         _next = next;
         _logger = logger;

@@ -1,4 +1,4 @@
-﻿using GamingApp.ApiService.Services.Interfaces;
+using GamingApp.ApiService.Services.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json.Serialization;
 using System.Text.Json;
@@ -20,7 +20,14 @@ public class RedisCacheService : ICacheService
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
-            ReferenceHandler = ReferenceHandler.Preserve
+            ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = false,
+            Converters =
+            {
+                new JsonStringEnumConverter(),
+                new TimeSpanConverter()
+            }
         };
     }
 
@@ -32,11 +39,22 @@ public class RedisCacheService : ICacheService
             try
             {
                 var cached = await _cache.GetStringAsync(key);
-                return string.IsNullOrEmpty(cached) ? default : JsonSerializer.Deserialize<T>(cached, _jsonOptions);
+                if (string.IsNullOrEmpty(cached)) return default;
+
+                try
+                {
+                    return JsonSerializer.Deserialize<T>(cached, _jsonOptions);
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError(ex, "Error deserializing cached item {Key}", key);
+                    await RemoveAsync(key);
+                    return default;
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving cached item {Key} with CorrelationId {CorrelationId}", key, correlationId);
+                _logger.LogError(ex, "Error retrieving cached item {Key}", key);
                 return default;
             }
         }
@@ -59,7 +77,7 @@ public class RedisCacheService : ICacheService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error caching item {Key} with CorrelationId {CorrelationId}", key, correlationId);
+                _logger.LogError(ex, "Error caching item {Key}", key);
             }
         }
     }
@@ -75,7 +93,7 @@ public class RedisCacheService : ICacheService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error removing cached item {Key} with CorrelationId {CorrelationId}", key, correlationId);
+                _logger.LogError(ex, "Error removing cached item {Key}", key);
             }
         }
     }
@@ -90,5 +108,17 @@ public class RedisCacheService : ICacheService
             _logger.LogWarning("RemoveByPrefixAsync not implemented with CorrelationId {CorrelationId}", correlationId);
             await Task.CompletedTask;
         }
+    }
+}
+public class TimeSpanConverter : JsonConverter<TimeSpan>
+{
+    public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return TimeSpan.Parse(reader.GetString()!);
+    }
+
+    public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString());
     }
 }

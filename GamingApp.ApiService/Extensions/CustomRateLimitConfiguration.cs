@@ -1,6 +1,7 @@
 ﻿using AspNetCoreRateLimit;
 
 using Microsoft.Extensions.Options;
+using Serilog.Context;
 
 namespace GamingApp.ApiService.Extensions;
 

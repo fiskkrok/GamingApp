@@ -1,18 +1,22 @@
-using Microsoft.Extensions.Logging;
-
 namespace GamingApp.ApiService.Extensions;
 
 public static class LoggingExtensions
 {
-    public static ILoggingBuilder AddCorrelationIdLogging(this ILoggingBuilder builder)
-    {
-        builder.AddProvider(new CorrelationIdLoggerProvider());
-        return builder;
-    }
-
     public static IApplicationBuilder UseLoggingMiddleware(this IApplicationBuilder builder)
     {
-        return builder.UseMiddleware<LoggingMiddleware>();
+        // Add your logging middleware implementation here
+        return builder;
+    }
+    public static IServiceCollection AddLoggingExtensions(this IServiceCollection services)
+    {
+        services.AddLogging(config =>
+        {
+            config.AddConsole();
+            config.AddDebug();
+            // Add other logging providers as needed
+        });
+
+        return services;
     }
 }
 

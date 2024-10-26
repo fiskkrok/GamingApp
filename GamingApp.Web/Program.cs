@@ -1,6 +1,6 @@
 using System.IO.Compression;
 using System.Security.Claims;
-using Duende.IdentityServer;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -14,7 +14,7 @@ using Microsoft.FluentUI.AspNetCore.Components;
 using GamingApp.Web.Clients;
 using GamingApp.Web.Services;
 using Ljbc1994.Blazor.IntersectionObserver;
-using Microsoft.AspNetCore.Authentication.OAuth.Claims;
+
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;

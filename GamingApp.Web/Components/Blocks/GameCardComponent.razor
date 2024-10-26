@@ -1,10 +1,19 @@
 ﻿@using GamingApp.Web.Models
-@using GamingApp.Web.Services
 
-@foreach (var game in Games)
+<LazyLoadComponent TComponent="FluentCard" Parameters="@(new Dictionary<string, object>
 {
-    <LazyGameCard Game="game" OnGameSelected="OpenGameDetails" />
-}
+    { "ChildContent", (RenderFragment)(builder =>
+        {
+            foreach (var game in Games)
+            {
+                builder.OpenComponent<LazyGameCard>(2);
+                builder.AddAttribute(1, "Game", game);
+                builder.AddAttribute(2, "OnGameSelected", EventCallback.Factory.Create<Game>(this, OpenGameDetails));
+                builder.CloseComponent();
+            }
+        })
+    }
+})" />
 
 <FluentDialog @ref="_myFluentDialog" @bind-Hidden="Hidden" AriaLabel="Game Details" Modal="true">
     <FluentDialogHeader>

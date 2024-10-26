@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Hosting;
 using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);

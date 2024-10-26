@@ -1,7 +1,4 @@
 using GamingApp.Web.Models;
-using Grpc.Core;
-using Microsoft.FluentUI.AspNetCore.Components;
-using Polly;
 
 namespace GamingApp.Web.Clients;
 

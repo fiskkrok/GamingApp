@@ -15,6 +15,11 @@
     <PackageVersion Include="AspNetCoreRateLimit" Version="5.0.0" />
     <PackageVersion Include="BlazorIntersectionObserver" Version="3.1.0" />
     <PackageVersion Include="Duende.IdentityServer" Version="7.0.7" />
+    <PackageVersion Include="FastEndpoints" Version="5.30.0.16-beta" />
+    <PackageVersion Include="FluentValidation" Version="11.10.0" />
+    <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0" />
+    <PackageVersion Include="HtmlSanitizer" Version="8.1.870" />
     <PackageVersion Include="IdentityModel" Version="7.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.0-rc.2.24474.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0-rc.2.24474.3" />
@@ -36,6 +41,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
     <PackageVersion Include="Polly" Version="8.4.2" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="StatefulReconnection" Version="0.1.0" />
   </ItemGroup>
 </Project>

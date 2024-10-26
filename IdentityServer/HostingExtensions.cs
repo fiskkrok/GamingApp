@@ -1,6 +1,3 @@
-using Duende.IdentityServer;
-using IdentityServer;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Serilog;
 
 namespace IdentityServer;

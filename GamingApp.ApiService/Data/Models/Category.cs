@@ -1,4 +1,3 @@
-﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace GamingApp.ApiService.Data.Models;
