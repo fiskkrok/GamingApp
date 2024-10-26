@@ -144,6 +144,7 @@
         if (result is { Cancelled: false, Data: CreateUserProfileModel model })
         {
             await CreateGameAccount(model.InGameUserName);
+            _userProfile = await UserApi.GetUserProfileAsync();
         }
     }
 
@@ -152,6 +153,7 @@
         try
         {
             _userProfile = await UserApi.CreateUserProfileAsync(inGameUserName);
+            _userProfile = await UserApi.GetUserProfileAsync();
             ToastService.ShowSuccess("Game Account created successfully!");
         }
         catch (Exception ex)
