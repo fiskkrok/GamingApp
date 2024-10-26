@@ -1,138 +1,134 @@
-﻿using Microsoft.EntityFrameworkCore;
+using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 using GamingApp.ApiService.Data;
 using GamingApp.ApiService.Data.Models;
 using GamingApp.ApiService.Services;
 using GamingApp.ApiService.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 using Serilog.Context;
 
 namespace GamingApp.ApiService.Endpoints;
 
-public static class GameEndpoints
+public class GetAllGamesEndpoint : Endpoint<GetAllGamesRequest, List<Game>>
 {
-    public static void MapGameEndpoints(this WebApplication app)
+    public override void Configure()
     {
-        app.MapGet("/games/{max:int}", GetAllGamesAsync).RequireAuthorization();
-        app.MapGet("/recentGames/{count:int}", GetRecentGamesAsync).RequireAuthorization();
-        app.MapGet("/recommendedGames/{count:int}", GetRecommendedGamesAsync).RequireAuthorization();
+        Get("/games/{max:int}");
+        AllowAnonymous();
     }
 
-    private static async ValueTask<IResult> GetAllGamesAsync(
-        AppDbContext context,
-        ILogger<Program> logger,
-        ICacheService cache,
-        [FromRoute] int max,
-        HttpContext httpContext)
+    public override async Task HandleAsync(GetAllGamesRequest req, CancellationToken ct)
     {
         var correlationId = Guid.NewGuid().ToString();
-        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
-
+        using (Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
             try
             {
-                var cacheKey = CacheKeys.GetGamesKey(max);
-                var cachedGames = await cache.GetAsync<List<Game>>(cacheKey);
+                var cacheKey = CacheKeys.GetGamesKey(req.Max);
+                var cachedGames = await Cache.GetAsync<List<Game>>(cacheKey);
 
                 if (cachedGames != null)
                 {
-                    logger.LogInformation("Retrieved {Count} games from cache", cachedGames.Count);
-                    return Results.Ok(cachedGames);
+                    Logger.LogInformation("Retrieved {Count} games from cache", cachedGames.Count);
+                    await SendOkAsync(cachedGames, ct);
+                    return;
                 }
 
-                var gamesFromDb = await context.Games
+                var gamesFromDb = await DbContext.Games
                     .Include(g => g.Genre)
-                    .Take(max)
-                    .ToListAsync();
+                    .Take(req.Max)
+                    .ToListAsync(ct);
 
-                await cache.SetAsync(cacheKey, gamesFromDb);
+                await Cache.SetAsync(cacheKey, gamesFromDb);
 
-                logger.LogInformation("Retrieved {Count} games from database", gamesFromDb.Count);
-                return Results.Ok(gamesFromDb);
+                Logger.LogInformation("Retrieved {Count} games from database", gamesFromDb.Count);
+                await SendOkAsync(gamesFromDb, ct);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error occurred while fetching games");
-                return Results.Problem("An error occurred while fetching games");
+                Logger.LogError(e, "Error occurred while fetching games");
+                await SendErrorsAsync(500, "An error occurred while fetching games", ct);
             }
         }
     }
+}
 
-    private static async ValueTask<IResult> GetRecentGamesAsync(
-        AppDbContext context,
-        ILogger<Program> logger,
-        ICacheService cache,
-        [FromRoute] int count = 10,
-        HttpContext httpContext)
+public class GetRecentGamesEndpoint : Endpoint<GetRecentGamesRequest, List<Game>>
+{
+    public override void Configure()
+    {
+        Get("/recentGames/{count:int}");
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync(GetRecentGamesRequest req, CancellationToken ct)
     {
         var correlationId = Guid.NewGuid().ToString();
-        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        using (Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
             try
             {
-                var cacheKey = $"recentGames_{count}";
-                var cachedRecentGames = await cache.GetStringAsync(cacheKey);
+                var cacheKey = CacheKeys.GetRecentGamesKey(req.Count);
+                var cachedRecentGames = await Cache.GetAsync<List<Game>>(cacheKey);
 
-                if (!string.IsNullOrEmpty(cachedRecentGames))
+                if (cachedRecentGames != null)
                 {
-                    var recentGames = JsonSerializer.Deserialize<List<Game>>(cachedRecentGames);
-                    logger.LogInformation("Retrieved {Count} recent games from cache", recentGames.Count);
-                    return Results.Ok(recentGames);
+                    Logger.LogInformation("Retrieved {Count} recent games from cache", cachedRecentGames.Count);
+                    await SendOkAsync(cachedRecentGames, ct);
+                    return;
                 }
 
-                var recentGamesFromDb = await context.Games
+                var recentGamesFromDb = await DbContext.Games
                     .Include(g => g.Genre)
                     .OrderByDescending(g => g.CreatedAt)
-                    .Take(count)
-                    .ToListAsync();
+                    .Take(req.Count)
+                    .ToListAsync(ct);
 
-                var serializedRecentGames = JsonSerializer.Serialize(recentGamesFromDb);
-                await cache.SetStringAsync(cacheKey, serializedRecentGames, new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-                });
+                await Cache.SetAsync(cacheKey, recentGamesFromDb);
 
-
-                logger.LogInformation("Retrieved {Count} recent games from database", recentGamesFromDb.Count);
-                return Results.Ok(recentGamesFromDb);
+                Logger.LogInformation("Retrieved {Count} recent games from database", recentGamesFromDb.Count);
+                await SendOkAsync(recentGamesFromDb, ct);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error occurred while fetching recent games");
-                return Results.Problem("An error occurred while fetching recent games");
+                Logger.LogError(e, "Error occurred while fetching recent games");
+                await SendErrorsAsync(500, "An error occurred while fetching recent games", ct);
             }
         }
     }
+}
 
-    private static async ValueTask<IResult> GetRecommendedGamesAsync(
-        AppDbContext context,
-        ILogger<Program> logger,
-        IDistributedCache cache,
-        [FromRoute] int count = 10,
-        HttpContext httpContext)
+public class GetRecommendedGamesEndpoint : Endpoint<GetRecommendedGamesRequest, List<object>>
+{
+    public override void Configure()
+    {
+        Get("/recommendedGames/{count:int}");
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync(GetRecommendedGamesRequest req, CancellationToken ct)
     {
         var correlationId = Guid.NewGuid().ToString();
-        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
-
+        using (Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
             try
             {
-                var cacheKey = $"recommendedGames_{count}";
-                var cachedRecommendedGames = await cache.GetStringAsync(cacheKey);
+                var cacheKey = CacheKeys.GetRecommendedGamesKey(req.Count);
+                var cachedRecommendedGames = await Cache.GetAsync<List<object>>(cacheKey);
 
-                if (!string.IsNullOrEmpty(cachedRecommendedGames))
+                if (cachedRecommendedGames != null)
                 {
-                    var recommendedGames = JsonSerializer.Deserialize<List<object>>(cachedRecommendedGames);
-                    logger.LogInformation("Retrieved {Count} recommended games from cache", recommendedGames.Count);
-                    return Results.Ok(recommendedGames);
+                    Logger.LogInformation("Retrieved {Count} recommended games from cache", cachedRecommendedGames.Count);
+                    await SendOkAsync(cachedRecommendedGames, ct);
+                    return;
                 }
 
-                var recommendedGamesFromDb = await context.Games
+                var recommendedGamesFromDb = await DbContext.Games
                     .Include(g => g.Genre)
                     .Include(g => g.GameSessions)
                     .OrderByDescending(g => g.GameSessions.Count)
-                    .Take(count)
+                    .Take(req.Count)
                     .Select(g => new
                     {
                         g.Id,
@@ -144,34 +140,33 @@ public static class GameEndpoints
                         g.Developer,
                         Popularity = g.GameSessions.Count
                     })
-                    .ToListAsync();
+                    .ToListAsync(ct);
 
-                var serializedRecommendedGames = JsonSerializer.Serialize(recommendedGamesFromDb);
-                await cache.SetStringAsync(cacheKey, serializedRecommendedGames, new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-                });
+                await Cache.SetAsync(cacheKey, recommendedGamesFromDb);
 
-                logger.LogInformation("Retrieved {Count} recommended games from database", recommendedGamesFromDb.Count);
-                return Results.Ok(recommendedGamesFromDb);
+                Logger.LogInformation("Retrieved {Count} recommended games from database", recommendedGamesFromDb.Count);
+                await SendOkAsync(recommendedGamesFromDb, ct);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error occurred while fetching recommended games");
-                return Results.Problem("An error occurred while fetching recommended games");
+                Logger.LogError(e, "Error occurred while fetching recommended games");
+                await SendErrorsAsync(500, "An error occurred while fetching recommended games", ct);
             }
         }
     }
 }
 
-//// Example: When a game is updated
-//public static async Task<IResult> UpdateGameAsync(
-//    AppDbContext context,
-//    ICacheService cache,
-//    Game game)
-//{
-//    // Update game logic...
-//    await cache.RemoveByPrefixAsync(CacheKeys.Games);
-//    await cache.RemoveByPrefixAsync(CacheKeys.RecommendedGames);
-//    // ...
-//}
+public class GetAllGamesRequest
+{
+    public int Max { get; set; }
+}
+
+public class GetRecentGamesRequest
+{
+    public int Count { get; set; }
+}
+
+public class GetRecommendedGamesRequest
+{
+    public int Count { get; set; }
+}

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 using GamingApp.ApiService.Data;
 using GamingApp.ApiService.Data.Models;
 using Microsoft.Extensions.Caching.Distributed;
@@ -7,36 +8,33 @@ using Serilog.Context;
 
 namespace GamingApp.ApiService.Endpoints;
 
-public static class CategoryEndpoints
+public class GetCategoriesEndpoint : EndpointWithoutRequest<List<Category>>
 {
-    public static void MapCategoryEndpoints(this WebApplication app)
+    public override void Configure()
     {
-        app.MapGet("/categories", GetCategoriesAsync).RequireAuthorization();
+        Get("/categories");
+        AllowAnonymous();
     }
 
-    private static async ValueTask<IResult> GetCategoriesAsync(
-        AppDbContext context,
-        ILogger<Program> logger,
-        IDistributedCache cache,
-        HttpContext httpContext)
+    public override async Task HandleAsync(CancellationToken ct)
     {
         var correlationId = Guid.NewGuid().ToString();
-        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
-
+        using (Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
             try
             {
                 var cacheKey = "categories";
-                var cachedCategories = await cache.GetStringAsync(cacheKey);
+                var cachedCategories = await Cache.GetStringAsync(cacheKey);
 
                 if (!string.IsNullOrEmpty(cachedCategories))
                 {
                     var categories = JsonSerializer.Deserialize<List<Category>>(cachedCategories);
-                    logger.LogInformation("Retrieved {Count} categories from cache", categories.Count);
-                    return Results.Ok(categories);
+                    Logger.LogInformation("Retrieved {Count} categories from cache", categories.Count);
+                    await SendOkAsync(categories, ct);
+                    return;
                 }
 
-                var categoriesFromDb = await context.Categories
+                var categoriesFromDb = await DbContext.Categories
                     .Select(c => new
                     {
                         c.Id,
@@ -44,21 +42,21 @@ public static class CategoryEndpoints
                         c.Icon,
                         GameCount = c.Games.Count
                     })
-                    .ToListAsync();
+                    .ToListAsync(ct);
 
                 var serializedCategories = JsonSerializer.Serialize(categoriesFromDb);
-                await cache.SetStringAsync(cacheKey, serializedCategories, new DistributedCacheEntryOptions
+                await Cache.SetStringAsync(cacheKey, serializedCategories, new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
                 });
 
-                logger.LogInformation("Retrieved {Count} categories from database", categoriesFromDb.Count);
-                return Results.Ok(categoriesFromDb);
+                Logger.LogInformation("Retrieved {Count} categories from database", categoriesFromDb.Count);
+                await SendOkAsync(categoriesFromDb, ct);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error occurred while fetching categories");
-                return Results.Problem("An error occurred while fetching categories");
+                Logger.LogError(e, "Error occurred while fetching categories");
+                await SendErrorsAsync(500, "An error occurred while fetching categories", ct);
             }
         }
     }
