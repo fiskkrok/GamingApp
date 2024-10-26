@@ -9,6 +9,7 @@ using GamingApp.ApiService.Services.Interfaces;
 using GamingApp.ApiService.Services;
 
 using GamingApp.ApiService.Extensions;
+using FastEndpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,15 +55,15 @@ builder.Services.AddExceptionMiddleware();
 // Add dependency injection for better testability and maintainability
 builder.Services.AddScoped<IAppDbContext, AppDbContext>();
 
+// Add FastEndpoints services
+builder.Services.AddFastEndpoints();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
-app.MapGameEndpoints();
-app.MapUserEndpoints();
-app.MapCategoryEndpoints();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseUserCheck();
@@ -70,14 +71,14 @@ app.UseUserCheck();
 // Add rate limiting middleware
 app.UseIpRateLimiting();
 
-
 // Add global exception handling middleware
 app.UseExceptionMiddleware();
 
 // Add structured logging middleware
 app.UseLoggingMiddleware();
 
+// Add FastEndpoints middleware
+app.UseFastEndpoints();
 
-app.MapDefaultEndpoints();
 await AppDbContext.EnsureDbCreatedAsync(app.Services);
 await app.RunAsync();

@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "build": "dotnet restore && dotnet build GamingApp.sln",
+    "launch": "dotnet run --project GamingApp.apphost"
+  }
+}
