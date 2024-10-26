@@ -20,6 +20,7 @@ else
     private bool _isVisible;
     private ElementReference _elementReference;
     private Dictionary<string, object>? _combinedParameters;
+    private IIntersectionObserver? _observer;
 
     protected override void OnParametersSet()
     {
@@ -34,7 +35,7 @@ else
     {
         if (firstRender)
         {
-            var observer = await IntersectionObserverService.Observe(_elementReference, (entries) =>
+            _observer = await IntersectionObserverService.Observe(_elementReference, (entries) =>
             {
                 if (entries.First().IsIntersecting)
                 {
@@ -43,5 +44,10 @@ else
                 }
             });
         }
+    }
+
+    public void Dispose()
+    {
+        _observer?.Dispose();
     }
 }
