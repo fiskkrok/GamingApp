@@ -51,6 +51,8 @@ builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 builder.Services.AddLoggingExtensions();
 builder.Services.AddExceptionMiddleware();
 
+// Add dependency injection for better testability and maintainability
+builder.Services.AddScoped<IAppDbContext, AppDbContext>();
 
 var app = builder.Build();
 

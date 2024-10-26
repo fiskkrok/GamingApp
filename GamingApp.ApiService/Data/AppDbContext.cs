@@ -1,8 +1,6 @@
-﻿
 using Polly;
 using Microsoft.EntityFrameworkCore;
 using GamingApp.ApiService.Data.Models;
-
 
 namespace GamingApp.ApiService.Data;
 
