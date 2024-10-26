@@ -3,7 +3,7 @@
 
 @foreach (var game in Games)
 {
-    <LazyGameCard Game="game" OnGameSelected="OpenGameDetails" />
+    <LazyLoadComponent TComponent="LazyGameCard" Parameters="@(new Dictionary<string, object> { { "Game", game }, { "OnGameSelected", EventCallback.Factory.Create<Game>(this, OpenGameDetails) } })" />
 }
 
 <FluentDialog @ref="_myFluentDialog" @bind-Hidden="Hidden" AriaLabel="Game Details" Modal="true">

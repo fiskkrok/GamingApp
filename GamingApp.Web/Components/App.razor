@@ -1,5 +1,3 @@
-﻿
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,9 +12,9 @@
     <link rel="stylesheet" href="GamingApp.Web.styles.css"/>
     <link rel="icon" type="image/png" href="favicon.png"/>
     <link rel="preload" href="_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css" as="style" />
-@*     <link rel="preload" href="css/bundle.min.css" as="style" />
+    <link rel="preload" href="css/bundle.min.css" as="style" />
     <link rel="stylesheet" href="css/bundle.min.css" />
-    <link rel="manifest" href="manifest.json" /> *@
+    <link rel="manifest" href="manifest.json" />
     <HeadOutlet @rendermode="@PageRenderMode"/>
 </head>
 
@@ -24,7 +22,7 @@
 <Routes @rendermode="@PageRenderMode"/>
 <script src="_framework/blazor.web.js"></script>
     <Routes @rendermode="@PageRenderMode" />
-    @* <script src="js/bundle.min.js" defer></script> *@
+    <script src="js/bundle.min.js" defer></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js');
