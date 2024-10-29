@@ -14,6 +14,8 @@
     margin-bottom: var(--spacing-medium);
     position: relative; /* Add this to contain absolute positioning */
     overflow: visible; /* Allow content to overflow outside the header */
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
 }
 
 .main-nav {
@@ -25,6 +27,12 @@
 
 .nav-link {
     position: relative; /* For positioning the hover text */
+    color: #6f4e37;
+    text-decoration: none;
+    padding: var(--spacing-small) var(--spacing-medium);
+    margin-right: var(--spacing-small);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    transition: background-color 0.3s ease;
 }
 
     .nav-link .nav-text {
@@ -36,7 +44,7 @@
         left: 50%;
         transform: translateX(-50%);
         background-color: transparent;
-        color: var(--background-color);
+        color: #6f4e37;
         text-shadow: 2px 2px var(--accent-color);
         font-size: 1.5rem;
         font-weight: bold;
@@ -50,20 +58,15 @@
     .nav-link:hover .nav-text {
         visibility: visible;
         opacity: 1;
+        color: #a67b5b;
     }
 
-.nav-link {
-    position: relative;
-    color: var(--background-color);
-    text-decoration: none;
-    padding: var(--spacing-small) var(--spacing-medium);
-    margin-right: var(--spacing-small);
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-    transition: background-color 0.3s ease;
-}
+    .nav-link:hover {
+        color: #a67b5b;
+    }
 
     .nav-link.active {
-        background-color: white;
+        background-color: #3b2f2f;
     }
 
         .nav-link.active::after {
@@ -73,14 +76,14 @@
             left: 0;
             right: 0;
             height: 2px;
-            background-color: white;
+            background-color: #3b2f2f;
         }
 
 .main-nav .fluent-nav-link {
     color: var(--background-color);
     text-decoration: none;
     padding: var(--spacing-small) var(--spacing-medium);
-    margin-right: var(--spacing-small);
+    margin-right: var (--spacing-small);
     border-radius: var(--border-radius);
     transition: background-color 0.3s ease;
 }

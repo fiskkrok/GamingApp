@@ -1,12 +1,17 @@
 :root {
     /* Color Palette */
-    --primary-color: #2b2d42;
+    --primary-color: var(--coffee-dark);
     --secondary-color: #8d99ae;
-    --accent-color: #ef233c;
+    --accent-color: var(--coffee-light);
     --background-color: #edf2f4;
     --background-color-dark: rgb(36, 36, 36);
     --text-color: #2c3e50;
     --card-background: #ffffff;
+    --coffee-dark: #6f4e37;
+    --coffee-light: #a67b5b;
+    --coffee-medium: #3b2f2f;
+    --glassy-background: rgba(0, 0, 0, 0.5);
+    --glassy-blur: blur(10px);
     /* Typography */
     --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --font-header: 'Press Start 2P', cursive;
@@ -138,4 +143,9 @@ h1, h2, h3, h4, h5, h6 {
     .grid {
         grid-template-columns: 1fr;
     }
+}
+
+.header-content {
+    background: var(--glassy-background);
+    backdrop-filter: var(--glassy-blur);
 }
