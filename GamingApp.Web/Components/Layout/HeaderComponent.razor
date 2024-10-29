@@ -1,8 +1,8 @@
 ﻿@inject NavigationManager NavManager
 
-<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" class="header-content">
+<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" Class="header-content">
     <div class="logo" @onclick="@(() => NavManager.NavigateTo("/"))">Pixel Quest</div>
-    <nav class="main-nav">
+    <nav class="main-nav navbar">
         <NavLink href="/" Match="NavLinkMatch.All" class="nav-link" ActiveClass="active">
             <FluentIcon Value="@(new Icons.Regular.Size24.Home().WithColor("#ffffff"))" />
             <span class="nav-text">Home</span>

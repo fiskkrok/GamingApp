@@ -5,36 +5,43 @@
 <AuthorizeView>
     <Authorized>
         <div class="user-menu">
-            <FluentButton Style="background-color: transparent" @onclick="@(() => NavManager.NavigateTo("/notifications"))" aria-label="Notifications">
-                <FluentIcon Value="@(new Icons.Regular.Size20.Alert())"  />
+            <FluentButton Class="user-menu-button" @onclick="@(() => NavManager.NavigateTo("/notifications"))"
+                aria-label="Notifications">
+                <FluentIcon Value="@(new Icons.Regular.Size20.Alert())" />
                 @if (_notificationCount > 0)
                 {
                     <FluentBadge Appearance="Appearance.Accent" Data="@_notificationCount.ToString()" />
                 }
             </FluentButton>
 
-            <FluentButton Style="background-color: transparent" @onclick="@(() => NavManager.NavigateTo("/messages"))" aria-label="Messages">
-                <FluentIcon Value="@(new Icons.Regular.Size20.ChatBubblesQuestion())"  />
+            <FluentButton Class="user-menu-button" @onclick="@(() => NavManager.NavigateTo("/messages"))"
+                aria-label="Messages">
+                <FluentIcon Value="@(new Icons.Regular.Size20.ChatBubblesQuestion())" />
                 @if (_unreadMessageCount > 0)
                 {
                     <FluentBadge Appearance="Appearance.Accent" Data="@_unreadMessageCount.ToString()" />
                 }
             </FluentButton>
 
-            <FluentButton Id="userMenuPopover" Style="background-color: transparent" @onclick="() => _isMenuOpen = !_isMenuOpen" aria-label="User menu">
-                <FluentIcon Value="@(new Icons.Regular.Size20.Person())"  />
+            <FluentButton Id="userMenuPopover" Class="user-menu-button" @onclick="() => _isMenuOpen = !_isMenuOpen"
+                aria-label="User menu">
+                <FluentIcon Value="@(new Icons.Regular.Size20.Person())" />
                 <span class="user-name">@userName</span>
             </FluentButton>
 
             <FluentPopover @bind-Open="_isMenuOpen" AnchorId="userMenuPopover">
+
                 <Body>
                     <nav class="user-menu-nav">
-                        <FluentAnchor Href="/profile" IconStart="@(new Icons.Regular.Size16.Person())">Profile</FluentAnchor>
-                        <FluentAnchor Href="/settings" IconStart="@(new Icons.Regular.Size16.Settings())">Settings</FluentAnchor>
-                        <FluentDivider Role="DividerRole.Presentation"  />
+                        <FluentAnchor Href="/profile" IconStart="@(new Icons.Regular.Size16.Person())">Profile
+                        </FluentAnchor>
+                        <FluentAnchor Href="/settings" IconStart="@(new Icons.Regular.Size16.Settings())">Settings
+                        </FluentAnchor>
+                        <FluentDivider Role="DividerRole.Presentation" />
                         <form method="post" action="user/signout" @formname="logout">
                             <AntiforgeryToken />
-                            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Lightweight" IconStart="@(new Icons.Filled.Size20.ArrowExit())">Log out</FluentButton>
+                            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Lightweight"
+                                IconStart="@(new Icons.Filled.Size20.ArrowExit())">Log out</FluentButton>
                         </form>
                     </nav>
                 </Body>

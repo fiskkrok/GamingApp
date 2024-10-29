@@ -1,16 +1,18 @@
 :root {
     /* Color Palette */
+    --coffee-dark: #3b2f2f;   /* Dark coffee shade */
+    --coffee-medium: #6f4e37; /* Medium coffee shade */
+    --coffee-light: #a67b5b;  /* Light coffee shade */
+
     --primary-color: var(--coffee-dark);
-    --secondary-color: #8d99ae;
-    --accent-color: var(--coffee-light);
-    --background-color: #edf2f4;
+    --secondary-color: var(--coffee-light);
+    --accent-color: var(--coffee-medium);
+    --background-color: #121212; /* Dark background */
+    --text-color: #ffffff;       /* Light text */
+    --card-background: #1e1e1e;  /* Dark card background */
+
+    --glassy-background: rgba(59, 47, 47, 0.5); /* Dark coffee color with opacity */
     --background-color-dark: rgb(36, 36, 36);
-    --text-color: #2c3e50;
-    --card-background: #ffffff;
-    --coffee-dark: #6f4e37;
-    --coffee-light: #a67b5b;
-    --coffee-medium: #3b2f2f;
-    --glassy-background: rgba(0, 0, 0, 0.5);
     --glassy-blur: blur(10px);
     /* Typography */
     --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -32,12 +34,14 @@
 body {
     font-family: var(--font-main);
     color: var(--text-color);
-    background-color: var(--background-color);
+    background: linear-gradient(to bottom, var(--background-color), var(--background-color-dark));
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-header);
     color: var(--primary-color);
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 h2 {
     font-size: 25px
@@ -54,9 +58,10 @@ h2 {
 .card {
     background-color: var(--card-background);
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     padding: var(--spacing-medium);
     margin-bottom: var(--spacing-medium);
+    border: 1px solid var(--accent-color);
 }
 
 /* Button Styles */
@@ -66,7 +71,9 @@ h2 {
     border-radius: var(--border-radius);
     text-decoration: none;
     transition: background-color 0.3s ease;
-    border: none;
+    border: 2px solid var(--accent-color);
+    background-color: transparent;
+    color: var(--accent-color);
 }
 
 .btn-primary {
@@ -150,5 +157,33 @@ h2 {
 
 .header-content {
     background: var(--glassy-background);
+    -webkit-backdrop-filter: var(--glassy-blur);
     backdrop-filter: var(--glassy-blur);
+}
+.navbar {
+    background: var(--glassy-background);
+    -webkit-backdrop-filter: var(--glassy-blur);
+    backdrop-filter: var(--glassy-blur);
+    color: var(--text-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+.navbar a {
+    color: var(--text-color);
+    font-weight: bold;
+    padding: var(--spacing-small);
+}
+.navbar a:hover {
+    color: var(--accent-color);
+}
+
+/* Add smooth transitions to interactive elements */
+a, .btn, .navbar a {
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: var(--accent-color);
+    color: var(--background-color);
 }

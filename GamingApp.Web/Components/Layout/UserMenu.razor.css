@@ -4,6 +4,16 @@
     gap: var(--spacing-small);
 }
 
+.user-menu-button {
+    background: transparent;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.user-menu-button:hover {
+    color: var(--accent-color);
+}
+
 .user-name {
     margin-left: var(--spacing-small);
     font-weight: 500;
@@ -21,11 +31,12 @@
     justify-content: flex-start;
     width: 100%;
     padding: var(--spacing-small) var(--spacing-medium);
+    transition: background-color 0.3s ease;
 }
 
 ::deep .user-menu-nav .fluent-anchor:hover,
 ::deep .user-menu-nav .fluent-button:hover {
-    background-color: var(--neutral-layer-2);
+    background-color: var(--accent-color);
 }
 
 ::deep .user-menu-nav .fluent-divider {

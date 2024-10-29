@@ -3,7 +3,7 @@
 
 @foreach (var game in Games)
 {
-    <FluentCard @onclick="() => OpenGameDetails(game)" class="game-card">
+    <FluentCard @onclick="() => OpenGameDetails(game)" Class="game-card">
         <div class="card-image">
             <img src="@game.PictureUrl" alt="@game.Name" loading="lazy" />
             @if (game.LastPlayedDate.HasValue)

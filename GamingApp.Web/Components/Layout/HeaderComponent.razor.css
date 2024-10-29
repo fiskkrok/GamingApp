@@ -14,8 +14,9 @@
     margin-bottom: var(--spacing-medium);
     position: relative; /* Add this to contain absolute positioning */
     overflow: visible; /* Allow content to overflow outside the header */
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
+    background: var(--glassy-background);
+    -webkit-backdrop-filter: var(--glassy-blur);
+    backdrop-filter: var(--glassy-blur);
 }
 
 .main-nav {
@@ -27,7 +28,7 @@
 
 .nav-link {
     position: relative; /* For positioning the hover text */
-    color: #6f4e37;
+    color: var(--text-color);
     text-decoration: none;
     padding: var(--spacing-small) var(--spacing-medium);
     margin-right: var(--spacing-small);
@@ -44,7 +45,7 @@
         left: 50%;
         transform: translateX(-50%);
         background-color: transparent;
-        color: #6f4e37;
+        color: var(--text-color);
         text-shadow: 2px 2px var(--accent-color);
         font-size: 1.5rem;
         font-weight: bold;
@@ -58,15 +59,15 @@
     .nav-link:hover .nav-text {
         visibility: visible;
         opacity: 1;
-        color: #a67b5b;
+        color: var(--secondary-color);
     }
 
     .nav-link:hover {
-        color: #a67b5b;
+        color: var(--secondary-color);
     }
 
     .nav-link.active {
-        background-color: #3b2f2f;
+        background-color: var(--accent-color);
     }
 
         .nav-link.active::after {
