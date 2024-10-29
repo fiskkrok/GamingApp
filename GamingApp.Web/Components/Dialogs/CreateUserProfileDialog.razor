@@ -1,19 +1,51 @@
-﻿@implements IDialogContentComponent<CreateUserProfileModel>
+﻿@using System.ComponentModel.DataAnnotations
+@implements IDialogContentComponent<CreateProfileModel>
 
 <FluentDialogBody>
-    <FluentTextField @bind-Value="@Content.InGameUserName" Label="In-Game Username:">
-        <FluentValidationMessage For="@(() => Content.InGameUserName)"/>
-    </FluentTextField>
+    <EditForm Model="@Content" OnValidSubmit="@SaveAsync">
+        <DataAnnotationsValidator />
+
+        <div class="mb-4">
+            <FluentTextField @bind-Value="Content.InGameUserName"
+                             Label="Choose your gaming username"
+                             Placeholder="Enter a unique username (letters, numbers, and underscores)">
+                <FluentValidationMessage For="@(() => Content.InGameUserName)" />
+            </FluentTextField>
+
+            <div class="text-sm text-secondary mt-2">
+                <ul>
+                    <li>Must be between 3 and 50 characters</li>
+                    <li>Can contain letters, numbers, underscores, and hyphens</li>
+                    <li>Must be unique across all players</li>
+                </ul>
+            </div>
+        </div>
+
+        <FluentDialogFooter>
+            <FluentButton Type="ButtonType.Submit"
+                          Appearance="Appearance.Accent"
+                          Disabled="@(!IsValid())">
+                Create Profile
+            </FluentButton>
+            <FluentButton Appearance="Appearance.Neutral"
+                          OnClick="@CancelAsync">
+                Cancel
+            </FluentButton>
+        </FluentDialogFooter>
+    </EditForm>
 </FluentDialogBody>
 
-<FluentDialogFooter>
-    <FluentButton Appearance="Appearance.Accent" OnClick="@SaveAsync" Disabled="@(!IsValid())">Create</FluentButton>
-    <FluentButton Appearance="Appearance.Neutral" OnClick="@CancelAsync">Cancel</FluentButton>
-</FluentDialogFooter>
-
 @code {
-    [Parameter] public CreateUserProfileModel Content { get; set; } = default!;
+    [Parameter] public CreateProfileModel Content { get; set; } = default!;
     [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
+
+    private bool IsValid()
+    {
+        if (string.IsNullOrWhiteSpace(Content.InGameUserName)) return false;
+        if (Content.InGameUserName.Length < 3) return false;
+        if (Content.InGameUserName.Length > 50) return false;
+        return System.Text.RegularExpressions.Regex.IsMatch(Content.InGameUserName, "^[a-zA-Z0-9_-]*$");
+    }
 
     private async Task SaveAsync()
     {
@@ -27,10 +59,6 @@
     {
         await Dialog.CancelAsync();
     }
-
-    private bool IsValid()
-    {
-        return !string.IsNullOrWhiteSpace(Content.InGameUserName);
-    }
-
 }
+
+

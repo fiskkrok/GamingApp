@@ -9,16 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GamingApp.ApiService.Endpoints;
 
-public class GetAllGamesEndpoint : Endpoint<GetAllGamesRequest, List<Game>>
+public class GetAllGamesEndpoint(AppDbContext dbContext, ICacheService cache) : Endpoint<GetAllGamesRequest, List<Game>>
 {
-    public GetAllGamesEndpoint(AppDbContext dbContext, ICacheService cache)
-    {
-        DbContext = dbContext;
-        Cache = cache;
-    }
-
-    private ICacheService Cache { get; }
-    private AppDbContext DbContext { get; }
+    private ICacheService Cache { get; } = cache;
+    private AppDbContext DbContext { get; } = dbContext;
 
     public override void Configure()
     {
@@ -62,16 +56,11 @@ public class GetAllGamesEndpoint : Endpoint<GetAllGamesRequest, List<Game>>
         }
     }
 
-    public class GetRecentGamesEndpoint : Endpoint<GetRecentGamesRequest, List<Game>>
+    public class GetRecentGamesEndpoint(AppDbContext dbContext, ICacheService cache)
+        : Endpoint<GetRecentGamesRequest, List<Game>>
     {
-        public GetRecentGamesEndpoint(AppDbContext dbContext, ICacheService cache)
-        {
-            DbContext = dbContext;
-            Cache = cache;
-        }
-
-        private ICacheService Cache { get; }
-        private AppDbContext DbContext { get; }
+        private ICacheService Cache { get; } = cache;
+        private AppDbContext DbContext { get; } = dbContext;
 
         public override void Configure()
         {
@@ -114,16 +103,11 @@ public class GetAllGamesEndpoint : Endpoint<GetAllGamesRequest, List<Game>>
     }
 
 
-    public class GetRecommendedGamesEndpoint : Endpoint<GetRecommendedGamesRequest, List<Game>>
+    public class GetRecommendedGamesEndpoint(AppDbContext dbContext, ICacheService cache)
+        : Endpoint<GetRecommendedGamesRequest, List<Game>>
     {
-        public GetRecommendedGamesEndpoint(AppDbContext dbContext, ICacheService cache)
-        {
-            DbContext = dbContext;
-            Cache = cache;
-        }
-
-        private ICacheService Cache { get; }
-        private AppDbContext DbContext { get; }
+        private ICacheService Cache { get; } = cache;
+        private AppDbContext DbContext { get; } = dbContext;
 
         public override void Configure()
         {

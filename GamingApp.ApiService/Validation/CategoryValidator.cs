@@ -1,10 +1,10 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using FluentValidation;
 using Ganss.Xss;
 
 namespace GamingApp.ApiService.Validation;
 
-public class CategoryValidator : AbstractValidator<CategoryRequest>
+public partial class CategoryValidator : AbstractValidator<CategoryRequest>
 {
     private static readonly HtmlSanitizer Sanitizer = new();
 
@@ -17,7 +17,7 @@ public class CategoryValidator : AbstractValidator<CategoryRequest>
             .WithMessage("Category name contains invalid characters");
 
         RuleFor(x => x.Description)
-            .Must(description => description == null || description.Length <= 200)
+            .Must(description => description is not { Length: > 200 })
             .WithMessage("Description must be 200 characters or less")
             .When(x => x.Description != null);
 
@@ -29,6 +29,9 @@ public class CategoryValidator : AbstractValidator<CategoryRequest>
 
     private static bool BeValidCategoryName(string name)
     {
-        return !Regex.IsMatch(name, @"[<>()\/\\&%#@!]");
+        return !InvalidCategoryNameRegex().IsMatch(name);
     }
+
+    [GeneratedRegex(@"[<>()\/\\&%#@!]")]
+    private static partial Regex InvalidCategoryNameRegex();
 }

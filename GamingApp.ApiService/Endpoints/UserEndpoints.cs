@@ -1,159 +1,17 @@
 using FastEndpoints;
 
 using GamingApp.ApiService.Data;
+using GamingApp.ApiService.Data.Models;
+using GamingApp.ApiService.Extensions;
+using GamingApp.ApiService.Validation;
 
 using Microsoft.EntityFrameworkCore;
 
-using GamingApp.ApiService.Data.Models;
-using GamingApp.ApiService.Extensions;
-using GamingApp.ApiService.Services.Interfaces;
-
-using Serilog.Context;
-using Microsoft.AspNetCore.Http;
-
 namespace GamingApp.ApiService.Endpoints;
 
-public class GetUserStatsEndpoint : EndpointWithoutRequest<UserStats>
+public class GetUserProfileEndpoint(AppDbContext dbContext, ILogger<GetUserProfileEndpoint> logger)
+    : EndpointWithoutRequest<UserProfileResponse>
 {
-    public GetUserStatsEndpoint(AppDbContext dbContext, ICacheService cache)
-    {
-        DbContext = dbContext;
-        Cache = cache;
-    }
-
-    private ICacheService Cache { get; }
-    private AppDbContext DbContext { get; }
-    public override void Configure()
-    {
-        Get("/userStats");
-
-    }
-
-    public override async Task HandleAsync(CancellationToken ct)
-    {
-        var correlationId = Guid.NewGuid().ToString();
-        using (Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
-        {
-            try
-            {
-                var userId = HttpContext.GetUserId();
-                var user = await DbContext.Users
-                    .Include(u => u.GameSessions)
-                    .FirstOrDefaultAsync(u => u.Id == userId, ct);
-
-                if (user == null)
-                {
-                    Logger.LogWarning("User with ID {UserId} not found", userId);
-                    await SendNotFoundAsync(ct);
-                    return;
-                }
-
-                var userStats = new UserStats
-                {
-                    TotalPlayTime = TimeSpan.FromTicks(user.GameSessions.Sum(gs => (gs.EndTime - gs.StartTime).Ticks)),
-                    GamesPlayed = user.GameSessions.Select(gs => gs.GameId).Distinct().Count(),
-                    AchievementsUnlocked = user.AchievementsUnlocked?.Count ?? 0
-                };
-
-                Logger.LogInformation("Retrieved stats for user {UserId}", userId);
-                await SendOkAsync(userStats, ct);
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, "Error occurred while fetching user stats");
-                await SendErrorsAsync(500,  ct);
-            }
-        }
-    }
-}
-
-public class CheckUsernameUniquenessEndpoint : EndpointWithoutRequest<bool>
-{
-    public CheckUsernameUniquenessEndpoint(AppDbContext dbContext)
-    {
-        DbContext = dbContext;
-    }
-
-    private AppDbContext DbContext { get; }
-    public override void Configure()
-    {
-        Get("/userProfile/checkUsername");
-    }
-
-    public override async Task HandleAsync(CancellationToken ct)
-    {
-        var correlationId = Guid.NewGuid().ToString();
-        using (LogContext.PushProperty("CorrelationId", correlationId))
-        {
-            try
-            {
-                var username = HttpContext.Request.Query["username"].ToString();
-                var exists = await DbContext.Users.AnyAsync(u => u.InGameUserName == username, ct);
-                await SendOkAsync(!exists, ct);
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, "Error occurred while checking username uniqueness");
-                await SendErrorsAsync(500, ct);
-            }
-        }
-    }
-}
-
-public class CreateUserProfileEndpoint : Endpoint<CreateUserProfileRequest, User>
-{
-    public CreateUserProfileEndpoint(AppDbContext dbContext)
-    {
-        DbContext = dbContext;
-    }
-
-    private AppDbContext DbContext { get; }
-    public override void Configure()
-    {
-        Post("/userProfile");
-
-    }
-
-    public override async Task HandleAsync(CreateUserProfileRequest req, CancellationToken ct)
-    {
-        var correlationId = Guid.NewGuid().ToString();
-        using (Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
-        {
-            var user = await UserHelper.EnsureUserExistsAsync(HttpContext, DbContext);
-            if (user == null)
-            {
-                await SendUnauthorizedAsync(ct);
-                return;
-            }
-
-            try
-            {
-                user.InGameUserName = req.InGameUserName;
-                DbContext.Users.Update(user);
-                await DbContext.SaveChangesAsync(ct);
-
-                await SendOkAsync(user, ct);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Error creating user profile");
-                await SendErrorsAsync(500, ct);
-            }
-        }
-    }
-}
-
-
-public class GetUserProfileEndpoint : EndpointWithoutRequest<User>
-{
-
-    public GetUserProfileEndpoint(AppDbContext dbContext)
-    {
-        DbContext = dbContext;
-    }
-
-    private AppDbContext DbContext { get; }
-
     public override void Configure()
     {
         Get("/userProfile");
@@ -162,29 +20,102 @@ public class GetUserProfileEndpoint : EndpointWithoutRequest<User>
     public override async Task HandleAsync(CancellationToken ct)
     {
         var correlationId = Guid.NewGuid().ToString();
-        using (Logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
-            var user = await UserHelper.EnsureUserExistsAsync(HttpContext, DbContext);
-            if (user == null)
-            {
-                await SendUnauthorizedAsync(ct);
-                return;
-            }
-
             try
             {
-                await SendOkAsync(user, ct);
+                var user = await UserHelper.EnsureUserExistsAsync(HttpContext, dbContext, logger, ct);
+                if (user == null)
+                {
+                    await SendUnauthorizedAsync(ct);
+                    return;
+                }
+
+                var response = user.ToProfileResponse();
+                await SendOkAsync(response, ct);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Logger.LogError(e, "Error occurred while fetching user profile");
+                logger.LogError(ex, "Error occurred while fetching user profile");
                 await SendErrorsAsync(500, ct);
             }
         }
     }
 }
 
-public class CreateUserProfileRequest
+public class CreateUserProfileEndpoint(AppDbContext dbContext, ILogger<CreateUserProfileEndpoint> logger)
+    : Endpoint<CreateUserProfileRequest, UserProfileResponse>
 {
-    public required string InGameUserName { get; set; }
+    public override void Configure()
+    {
+        Put("/userProfile");
+    }
+
+    public override async Task HandleAsync(CreateUserProfileRequest req, CancellationToken ct)
+    {
+        var correlationId = Guid.NewGuid().ToString();
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        {
+            try
+            {
+                // Check if username is unique
+                var user = await UserHelper.EnsureUserExistsAsync(HttpContext, dbContext, logger, ct);
+                if (user == null)
+                {
+                    await SendUnauthorizedAsync(ct);
+                    return;
+                }
+
+                // Check if username is unique excluding the current user
+                if (await dbContext.Users.AnyAsync(u => u.InGameUserName == req.InGameUserName && u.Id != user.Id, ct))
+                {
+                    AddError("InGameUserName is already taken");
+                    await SendErrorsAsync(cancellation: ct);
+                    return;
+                }
+
+                user.InGameUserName = req.InGameUserName;
+                if (!string.IsNullOrEmpty(req.Bio)) user.Bio = req.Bio;
+                if (!string.IsNullOrEmpty(req.Status)) user.Status = req.Status;
+
+                await dbContext.SaveChangesAsync(ct);
+
+                var response = user.ToProfileResponse();
+                await SendOkAsync(response, ct);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error creating user profile");
+                await SendErrorsAsync(500, ct);
+            }
+        }
+    }
+}
+
+public class CheckUsernameUniquenessEndpoint(AppDbContext dbContext, ILogger<CheckUsernameUniquenessEndpoint> logger)
+    : EndpointWithoutRequest<bool>
+{
+    public override void Configure()
+    {
+        Get("/userProfile/checkUsername");
+    }
+
+    public override async Task HandleAsync(CancellationToken ct)
+    {
+        var correlationId = Guid.NewGuid().ToString();
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        {
+            try
+            {
+                var username = HttpContext.Request.Query["username"].ToString();
+                var exists = await dbContext.Users.AnyAsync(u => u.InGameUserName == username, ct);
+                await SendOkAsync(!exists, ct);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error checking username uniqueness");
+                await SendErrorsAsync(500, ct);
+            }
+        }
+    }
 }

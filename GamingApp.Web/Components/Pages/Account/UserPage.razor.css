@@ -26,3 +26,7 @@
 .card img:hover {
     transform: scale(1.05);
 }
+.control {
+    border: none !important;
+    background-color: var(--background-color) !important;
+}

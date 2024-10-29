@@ -24,7 +24,7 @@ public class CorrelationIdLoggerProvider : ILoggerProvider
 {
     public ILogger CreateLogger(string categoryName)
     {
-        return new CorrelationIdLogger();
+        return new CorrelationIdLogger(new HttpContextAccessor());
     }
 
     public void Dispose()
@@ -34,8 +34,16 @@ public class CorrelationIdLoggerProvider : ILoggerProvider
 
 public class CorrelationIdLogger : ILogger
 {
-    public IDisposable BeginScope<TState>(TState state)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public CorrelationIdLogger(IHttpContextAccessor httpContextAccessor)
     {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public IDisposable? BeginScope<TState>(TState state)
+    {
+
         return null;
     }
 
@@ -44,33 +52,25 @@ public class CorrelationIdLogger : ILogger
         return true;
     }
 
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
-        var correlationId = Guid.NewGuid().ToString(); // This should be replaced with actual correlation ID logic
+        var context = _httpContextAccessor.HttpContext;
+        var correlationId = context?.TraceIdentifier ?? "N/A"; // Use the actual correlation ID from the context
         var message = formatter(state, exception);
         Console.WriteLine($"[{correlationId}] {logLevel}: {message}");
     }
 }
 
-public class LoggingMiddleware
+public class LoggingMiddleware(RequestDelegate next, ILogger<LoggingMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<LoggingMiddleware> _logger;
-
-    public LoggingMiddleware(RequestDelegate next, ILogger<LoggingMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         var correlationId = Guid.NewGuid().ToString();
-        using (_logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
-            _logger.LogInformation("Handling request: {Path}", context.Request.Path);
-            await _next(context);
-            _logger.LogInformation("Finished handling request.");
+            logger.LogInformation("Handling request: {Path}", context.Request.Path);
+            await next(context);
+            logger.LogInformation("Finished handling request.");
         }
     }
 }

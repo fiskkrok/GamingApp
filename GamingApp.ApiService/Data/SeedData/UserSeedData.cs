@@ -5,19 +5,29 @@ namespace GamingApp.ApiService.Data.SeedData;
 
 public class UserSeedData
 {
-    public static async Task<User> GetSeedData(List< Game> games)
+    public static List<User> GetSeedData(List< Game> games)
     {
-        var user = new User(
-            "mock_sid",
-            "MockUser",
-            "mockuser@example.com",
-            DateTime.UtcNow,
-            "MockGamer"
-        );
-        foreach (var game in games)
-        {
-            user.PlayedGames.Add(game);
-        }
-        return user;
+            return
+            [
+                new User(
+                    "mock_sid",
+                    "MockUser",
+                    "mockuser@example.com",
+                    DateTime.UtcNow,
+                    "MockGamer"
+                ){
+                    PlayedGames = [..games.Take(3)]
+                },
+                new User(
+                    "DC9BED62B3766F20841BBB5231639F8E",
+                    "Bob Smith",
+                    "BobSmith@email.com",
+                    DateTime.UtcNow,
+                    "BobTheGamer"
+                ){
+                    PlayedGames = [..games.Take(3)]
+                },
+
+            ];
     }
 }

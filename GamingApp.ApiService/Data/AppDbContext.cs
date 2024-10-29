@@ -12,7 +12,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users { get; set; } // Add DbSet for User
     public DbSet<Category> Categories { get; set; }
     public DbSet<Achievement> Achievements { get; set; }
-    private static readonly Random Random = new();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -23,28 +22,30 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         using var scope = services.CreateScope();
 
-        await using (var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>())
-        {
-            var retryPolicy = Policy
-                .Handle<Exception>()
-                .WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(3));
+        await using var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var retryPolicy = Policy
+            .Handle<Exception>()
+            .WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(3));
 
-            await retryPolicy.ExecuteAsync(async () =>
+        await retryPolicy.ExecuteAsync(async () =>
+        {
+            try
             {
-                try
+                await dbContext.Database.MigrateAsync();
+                if (!(await dbContext.Categories.AnyAsync() || await dbContext.Users.AnyAsync() ||
+                     await dbContext.Games.AnyAsync()))
                 {
-                    await dbContext.Database.MigrateAsync();
                     await InitializeDataAsync(dbContext);
                 }
-                catch (Exception ex)
-                {
-                    // Log the error (you can replace this with your logging mechanism)
-                    await Console.Error.WriteLineAsync(
-                        $"An error occurred while ensuring the database is created: {ex.Message}");
-                    throw;
-                }
-            });
-        }
+            }
+            catch (Exception ex)
+            {
+                // Log the error (you can replace this with your logging mechanism)
+                await Console.Error.WriteLineAsync(
+                    $"An error occurred while ensuring the database is created: {ex.Message}");
+                throw;
+            }
+        });
     }
 
     private static async Task InitializeDataAsync(AppDbContext dbContext)
@@ -55,21 +56,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             await using var transaction = await dbContext.Database.BeginTransactionAsync();
             try
             {
+
+
                 var newCategories = SeedDataFactory.CreateSeedData(typeof(Category)) as List<Category>;
-                await dbContext.Categories.AddRangeAsync(newCategories);
+                await dbContext.Categories.AddRangeAsync(newCategories!);
                 await dbContext.SaveChangesAsync();
 
                 var newGames = SeedDataFactory.CreateSeedData(typeof(Game)) as List<Game>;
-                await dbContext.Games.AddRangeAsync(newGames);
+                await dbContext.Games.AddRangeAsync(newGames!);
                 await dbContext.SaveChangesAsync();
 
-                var user =  SeedDataFactory.CreateSeedData(typeof(User)) as User;
-                await dbContext.AddRangeAsync(user);
+                var user = SeedDataFactory.CreateSeedData(typeof(User)) as List<User>;
+                await dbContext.AddRangeAsync(user!);
                 await dbContext.SaveChangesAsync();
 
 
-                var newGameSessions =  SeedDataFactory.CreateSeedData(typeof(GameSession)) as List<GameSession>;
-                await dbContext.GameSessions.AddRangeAsync(newGameSessions);
+                var newGameSessions = SeedDataFactory.CreateSeedData(typeof(GameSession)) as List<GameSession>;
+                await dbContext.GameSessions.AddRangeAsync(newGameSessions!);
                 await dbContext.SaveChangesAsync();
 
                 await transaction.CommitAsync();

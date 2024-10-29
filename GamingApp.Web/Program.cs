@@ -12,8 +12,7 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.FluentUI.AspNetCore.Components;
 using GamingApp.Web.Clients;
-using GamingApp.Web.Services;
-using Ljbc1994.Blazor.IntersectionObserver;
+
 
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -90,8 +89,6 @@ builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
     options.Level = CompressionLevel.Optimal;
 });
 
-builder.Services.AddSingleton<IImageOptimizationService, ImageOptimizationService>();
-builder.Services.AddScoped<IIntersectionObserverService, IntersectionObserverService>();
 builder.Services.AddOutputCache(options =>
 {
     options.AddBasePolicy(builder =>

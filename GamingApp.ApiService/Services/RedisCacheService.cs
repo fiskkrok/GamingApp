@@ -6,30 +6,21 @@ using Serilog.Context;
 
 namespace GamingApp.ApiService.Services;
 
-public class RedisCacheService : ICacheService
+public class RedisCacheService(IDistributedCache cache, ILogger<RedisCacheService> logger) : ICacheService
 {
-    private readonly IDistributedCache _cache;
-    private readonly ILogger<RedisCacheService> _logger;
-    private readonly JsonSerializerOptions _jsonOptions;
-    private const int DefaultCacheMinutes = 5;
-
-    public RedisCacheService(IDistributedCache cache, ILogger<RedisCacheService> logger)
+    private readonly JsonSerializerOptions _jsonOptions = new()
     {
-        _cache = cache;
-        _logger = logger;
-        _jsonOptions = new JsonSerializerOptions
+        PropertyNameCaseInsensitive = true,
+        ReferenceHandler = ReferenceHandler.IgnoreCycles,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        WriteIndented = false,
+        Converters =
         {
-            PropertyNameCaseInsensitive = true,
-            ReferenceHandler = ReferenceHandler.IgnoreCycles,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            WriteIndented = false,
-            Converters =
-            {
-                new JsonStringEnumConverter(),
-                new TimeSpanConverter()
-            }
-        };
-    }
+            new JsonStringEnumConverter(),
+            new TimeSpanConverter()
+        }
+    };
+    private const int DefaultCacheMinutes = 5;
 
     public async Task<T?> GetAsync<T>(string key)
     {
@@ -38,7 +29,7 @@ public class RedisCacheService : ICacheService
         {
             try
             {
-                var cached = await _cache.GetStringAsync(key);
+                var cached = await cache.GetStringAsync(key);
                 if (string.IsNullOrEmpty(cached)) return default;
 
                 try
@@ -47,14 +38,14 @@ public class RedisCacheService : ICacheService
                 }
                 catch (JsonException ex)
                 {
-                    _logger.LogError(ex, "Error deserializing cached item {Key}", key);
+                    logger.LogError(ex, "Error deserializing cached item {Key}", key);
                     await RemoveAsync(key);
                     return default;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving cached item {Key}", key);
+                logger.LogError(ex, "Error retrieving cached item {Key}", key);
                 return default;
             }
         }
@@ -73,11 +64,11 @@ public class RedisCacheService : ICacheService
                 };
 
                 var serialized = JsonSerializer.Serialize(value, _jsonOptions);
-                await _cache.SetStringAsync(key, serialized, options);
+                await cache.SetStringAsync(key, serialized, options);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error caching item {Key}", key);
+                logger.LogError(ex, "Error caching item {Key}", key);
             }
         }
     }
@@ -89,11 +80,11 @@ public class RedisCacheService : ICacheService
         {
             try
             {
-                await _cache.RemoveAsync(key);
+                await cache.RemoveAsync(key);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error removing cached item {Key}", key);
+                logger.LogError(ex, "Error removing cached item {Key}", key);
             }
         }
     }
@@ -105,17 +96,16 @@ public class RedisCacheService : ICacheService
         {
             // Implementation depends on your Redis setup
             // This is a placeholder for pattern-based cache invalidation
-            _logger.LogWarning("RemoveByPrefixAsync not implemented with CorrelationId {CorrelationId}", correlationId);
+            logger.LogWarning("RemoveByPrefixAsync not implemented with CorrelationId {CorrelationId}", correlationId);
             await Task.CompletedTask;
         }
     }
 }
 public class TimeSpanConverter : JsonConverter<TimeSpan>
 {
-    public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        return TimeSpan.Parse(reader.GetString()!);
-    }
+#pragma warning disable S6580
+    public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => TimeSpan.Parse(reader.GetString()!);
+#pragma warning restore S6580
 
     public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
     {

@@ -11,7 +11,7 @@ public class UserApiClient(HttpClient httpClient)
 
     public async Task<UserProfile> CreateUserProfileAsync(string inGameUserName)
     {
-        var response = await httpClient.PostAsJsonAsync("/userProfile", new { InGameUserName = inGameUserName });
+        var response = await httpClient.PutAsJsonAsync("/userProfile", new { InGameUserName = inGameUserName });
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<UserProfile>() ??
                throw new InvalidOperationException("Failed to create user profile");

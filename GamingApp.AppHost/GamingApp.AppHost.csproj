@@ -15,6 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="..\GamingApp.ApiService\GamingApp.ApiService.csproj" />
     <ProjectReference Include="..\GamingApp.Web\GamingApp.Web.csproj" />
-    <ProjectReference Include="..\IdentityServer\IdentityServer.csproj" />
+    <ProjectReference Include="..\IdentityServerdaw\IdentityServerdaw.csproj" />
   </ItemGroup>
 </Project>

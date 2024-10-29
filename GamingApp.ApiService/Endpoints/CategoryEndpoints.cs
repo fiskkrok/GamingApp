@@ -9,16 +9,10 @@ using GamingApp.ApiService.Services.Interfaces;
 
 namespace GamingApp.ApiService.Endpoints;
 
-public class GetCategoriesEndpoint : EndpointWithoutRequest<List<Category>>
+public class GetCategoriesEndpoint(AppDbContext dbContext, ICacheService cache) : EndpointWithoutRequest<List<Category>>
 {
-    public GetCategoriesEndpoint(AppDbContext dbContext, ICacheService cache)
-    {
-        DbContext = dbContext;
-        Cache = cache;
-    }
-
-    private ICacheService Cache { get; }
-    private AppDbContext DbContext { get; }
+    private ICacheService Cache { get; } = cache;
+    private AppDbContext DbContext { get; } = dbContext;
 
     public override void Configure()
     {

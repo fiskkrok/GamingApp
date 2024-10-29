@@ -1,39 +1,59 @@
 using GamingApp.ApiService.Data;
-using GamingApp.ApiService.Endpoints;
+using GamingApp.ApiService.Data.Models;
+using GamingApp.ApiService.Extensions;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace GamingApp.ApiService;
 
-public class UserCheckMiddleware(RequestDelegate next)
+public class UserCheckMiddleware(RequestDelegate next, ILogger<UserCheckMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<UserCheckMiddleware> _logger;
-
-    public UserCheckMiddleware(RequestDelegate next, ILogger<UserCheckMiddleware> logger) : this(next)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context, AppDbContext dbContext)
     {
-        var correlationId = Guid.NewGuid().ToString();
-        using (_logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        var correlationId = context.TraceIdentifier;
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
             try
             {
-                var user = await UserHelper.EnsureUserExistsAsync(context, dbContext);
-                if (user != null) context.Items["UserId"] = user.Id;
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error in UserCheckMiddleware with correlation ID: {CorrelationId}", correlationId);
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await context.Response.WriteAsync(
-                    "An error occurred while processing your request. Please try again later.");
-                return;
-            }
+                // Only check for authenticated users
+                if (context.User.Identity?.IsAuthenticated == true)
+                {
+                    var identityServerSid = context.GetRequiredIdentityServerSid();
+                    logger.LogInformation("Checking user with SID: {Sid}", identityServerSid);
 
-            await _next(context);
+                    var user = await dbContext.Users
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(u => u.IdentityServerSid == identityServerSid);
+
+                    if (user != null)
+                    {
+                        context.Items["UserId"] = user.Id;
+                        logger.LogInformation("Found existing user profile for SID: {Sid}", identityServerSid);
+                    }
+                    else
+                    {
+                        // If this is a profile-related endpoint, let it handle the missing profile
+                        if (context.Request.Path.StartsWithSegments("/userProfile"))
+                        {
+                            logger.LogInformation("No profile found for SID: {Sid} - Allowing profile creation", identityServerSid);
+                        }
+                        else
+                        {
+                            logger.LogInformation("No profile found for SID: {Sid} - Redirecting to profile creation", identityServerSid);
+                            context.Response.StatusCode = StatusCodes.Status307TemporaryRedirect;
+                            context.Response.Headers.Location = "/profile";
+                            return;
+                        }
+                    }
+                }
+
+                await next(context);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in UserCheckMiddleware");
+                throw;
+            }
         }
     }
 }

@@ -20,13 +20,13 @@ public class User(
 
     public DateTime CreatedAt { get; init; } = createdAt;
 
-    [Required] public string InGameUserName { get; init; } = inGameUserName;
+    [Required] public string InGameUserName { get; set; } = inGameUserName;
 
     public string? FavoriteGame { get; init; }
 
-    public string? Bio { get; init; }
+    public string? Bio { get; set; }
 
-    public string? Status { get; init; }
+    public string? Status { get; set; }
 
     // Navigation properties
     public ICollection<GameSession> GameSessions { get; init; } = [];

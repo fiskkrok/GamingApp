@@ -24,7 +24,7 @@
                     <h2 class="mb-2">Recently Played</h2>
                     @if (RecentGames.Any())
                     {
-                        <FluentDataGrid Items="@RecentGames.AsQueryable()" GridTemplateColumns="1fr 1fr">
+                        <FluentDataGrid Items="@RecentGames.AsQueryable().Take(5)" GridTemplateColumns="1fr 1fr">
                             <PropertyColumn Property="@(g => g.Name)" Title="Game" />
                             <PropertyColumn Property="@(g => g.LastPlayedDate)" Title="Last Played" Format="MMM dd, yyyy" />
                         </FluentDataGrid>

@@ -8,7 +8,7 @@ namespace GamingApp.ApiService.Data.SeedData;
 public static class SeedDataFactory
 {
     private static List<Category>? Categories { get; set; }
-    private static User? User { get; set; }
+    private static List<User> User { get; set; }
     private static List<Game>? Game { get; set; }
     public static object CreateSeedData(Type type)
     {
@@ -20,10 +20,10 @@ public static class SeedDataFactory
 
         if (type == typeof(Game) && Categories != null) return Game = GameSeedData.GetSeedData(Categories);
 
-        if (type == typeof(User) && Game != null) return User = UserSeedData.GetSeedData(Game).Result;
+        if (type == typeof(User) && Game != null) return User = UserSeedData.GetSeedData(Game);
 
         if (type == typeof(GameSession) && Game != null && User != null)
-            return GameSessionSeedData.GetSeedData(Game, User);
+            return GameSessionSeedData.GetSeedData(Game, User[0]);
 
         throw new ArgumentException("Invalid type for seed data creation");
     }
