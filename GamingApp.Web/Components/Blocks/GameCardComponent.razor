@@ -17,6 +17,7 @@
             <h3 class="game-title">@game.Name</h3>
             <p class="game-brief">@(game.Description?.Length > 50 ? game.Description[..50] + "..." : game.Description)</p>
             <p class="game-genre">@game.Genre.Name</p>
+            <FluentButton Appearance="Appearance.Accent" OnClick="() => PlayGame(game)">Play Now</FluentButton>
         </div>
     </FluentCard>
 }
@@ -42,13 +43,15 @@
                     {
                         <p><strong>Last Played:</strong> @_selectedGame.LastPlayedDate.Value.ToShortDateString()</p>
                     }
+                    <p><strong>Rating:</strong> @_selectedGame.Rating</p>
+                    <p><strong>Platform:</strong> @_selectedGame.Platform</p>
                 </div>
             </div>
         }
     </FluentDialogBody>
     <FluentDialogFooter>
         <FluentButton Appearance="Appearance.Accent" OnClick="OnClose">Close</FluentButton>
-        <FluentButton Appearance="Appearance.Accent">Play Now</FluentButton>
+        <FluentButton Appearance="Appearance.Accent" OnClick="() => PlayGame(_selectedGame)">Play Now</FluentButton>
     </FluentDialogFooter>
 </FluentDialog>
 
@@ -75,4 +78,12 @@
         return game.LastPlayedDate.HasValue ? 75 : 0;
     }
 
+    private void PlayGame(Game? game)
+    {
+        if (game != null)
+        {
+            Logger.LogInformation($"Playing game: {game.Name}");
+            // Add logic to start the game
+        }
+    }
 }
